@@ -210,6 +210,12 @@
   /* ── Method ── */
   #method { background: var(--bg2); }
   .method-container { max-width: 1280px; }
+  .method-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.75fr);
+    gap: 2rem;
+    align-items: start;
+  }
   .method-img-wrap {
     border-radius: var(--r);
     overflow: hidden;
@@ -222,9 +228,9 @@
   .method-img-wrap img { width: 100%; display: block; }
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: 1fr;
     gap: 1.2rem;
-    margin-top: 2rem;
+    margin-top: 0;
   }
   .feature-card {
     background: var(--card-bg);
@@ -244,6 +250,7 @@
   .feature-icon.amber { background: rgba(245,158,11,0.15); }
   .feature-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text); }
   .feature-card p { font-size: 0.85rem; margin: 0; }
+  .method-side-caption { text-align: left; margin-top: 0.85rem; }
 
   /* ── Results / Slider ── */
   #results { padding: 90px 2rem; }
@@ -366,6 +373,22 @@
     font-family: 'JetBrains Mono', monospace;
     letter-spacing: 0.05em;
   }
+  .paper-visual-wrap {
+    margin-top: 2.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    background: var(--bg2);
+    overflow: hidden;
+    box-shadow: 0 18px 48px rgba(15,23,42,0.12);
+  }
+  .paper-visual-wrap img { width: 100%; display: block; }
+  .paper-visual-caption {
+    padding: 0.75rem 1rem;
+    margin: 0;
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--dim);
+  }
 
   /* ── Quantitative ── */
   #quantitative { scroll-margin-top: 72px; }
@@ -400,6 +423,8 @@
     background: var(--bg2);
     margin-bottom: 2.2rem;
   }
+  .table-title { margin-bottom:0.8rem; font-size:0.88rem; }
+  .table-subtitle { margin: 1rem 0 0.65rem; font-size: 0.82rem; color: var(--dim); }
   table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 700px; }
   th {
     background: var(--bg3);
@@ -479,6 +504,7 @@
     .abstract-card { padding: 1.5rem; }
     .gallery-grid { grid-template-columns: 1fr; }
     .features-grid { grid-template-columns: 1fr; }
+    .method-layout { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -568,28 +594,32 @@
     <h2>Three-Stage Framework</h2>
     <div class="section-divider"></div>
 
-    <div class="method-img-wrap">
-      <img src="https://raw.githubusercontent.com/Fightforql/tmp/main/image/figure.png" alt="SLAIR Framework Overview">
-    </div>
-    <p class="fig-caption">
-      <strong style="color:var(--text)">Fig. 2</strong> — SLAIR pipeline. A degraded image is encoded via VAE, structured via latent separation loss, transported deterministically through flow matching (LightningDiT backbone), then decoded with wavelet-based high-frequency refinement.
-    </p>
+    <div class="method-layout">
+      <div>
+        <div class="method-img-wrap">
+          <img src="https://raw.githubusercontent.com/Fightforql/tmp/main/image/figure.png" alt="SLAIR Framework Overview">
+        </div>
+        <p class="fig-caption method-side-caption">
+          <strong style="color:var(--text)">Fig. 2</strong> — SLAIR pipeline: degraded images are encoded into latent space, transported deterministically through flow matching, and decoded with wavelet-based high-frequency refinement.
+        </p>
+      </div>
 
-    <div class="features-grid mt-2">
-      <div class="feature-card">
-        <div class="feature-icon blue">🗂️</div>
-        <h4>① Latent Space Separation</h4>
-        <p>We fine-tune the VAE with a contrastive classification loss to maximize inter-manifold distance between degraded and clean latents. This structured geometry simplifies transport dynamics and stabilizes training.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon purple">🌊</div>
-        <h4>② Deterministic Flow Matching</h4>
-        <p>A LightningDiT-based velocity field learns continuous ODE transport from z<sub>deg</sub> → z<sub>gt</sub>. No degradation labels needed, no stochastic sampling—just a single deterministic ODE solve at inference.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon amber">✨</div>
-        <h4>③ High-Frequency Refinement</h4>
-        <p>A DWT-based fusion block in the VAE decoder injects restored high-frequency details before final decoding, eliminating latent-to-pixel distortion and enabling arbitrary-resolution inference.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon blue">1</div>
+          <h4>Latent Space Separation</h4>
+          <p>We fine-tune the VAE with a contrastive classification loss to maximize inter-manifold distance between degraded and clean latents. This structured geometry simplifies transport dynamics and stabilizes training.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon purple">2</div>
+          <h4>Deterministic Flow Matching</h4>
+          <p>A LightningDiT-based velocity field learns continuous ODE transport from z<sub>deg</sub> to z<sub>gt</sub>. No degradation labels needed, no stochastic sampling; just a single deterministic ODE solve at inference.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon amber">3</div>
+          <h4>High-Frequency Refinement</h4>
+          <p>A DWT-based fusion block in the VAE decoder injects restored high-frequency details before final decoding, eliminating latent-to-pixel distortion and enabling arbitrary-resolution inference.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -600,94 +630,111 @@
   <div class="container">
     <div id="quantitative" class="benchmark-block">
       <div class="section-label">Quantitative Benchmarks</div>
-      <h2>State-of-the-Art on 5-Task & 8-Task Benchmarks</h2>
+      <h2>State-of-the-Art on Setting (i) &amp; Setting (ii)</h2>
       <div class="section-divider"></div>
-      <p>SLAIR is evaluated under two settings: <strong style="color:var(--text)">Setting (i)</strong> covers the comprehensive 8-task benchmark, while <strong style="color:var(--text)">Setting (ii)</strong> follows the standard 5-task all-in-one benchmark. Metrics: PSNR↑ / SSIM↑ / LPIPS↓ / FID↓.</p>
+      <p>SLAIR is evaluated under two paper settings: <strong style="color:var(--text)">Setting (i)</strong> is the comprehensive benchmark over Rain1400, Outdoor-Rain, Raindrop, UHDSnow, SOTS, BSD68, LoL, UHDM, and HDR-Eye; <strong style="color:var(--text)">Setting (ii)</strong> is the standard 5-task all-in-one benchmark over BSD68, GoPro, LoL, Rain100L, and SOTS.</p>
 
-      <div class="metrics-row mt-2">
-        <div class="metric-card">
-          <div class="metric-num">+5.6%</div>
-          <div class="metric-label">Avg PSNR gain vs. top baselines</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-num">-3%</div>
-          <div class="metric-label">LPIPS reduction (perceptual)</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-num">8 Tasks</div>
-          <div class="metric-label">Handled by single unified model</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-num">31.05</div>
-          <div class="metric-label">Avg FID on Setting (ii)</div>
-        </div>
-      </div>
-
-      <p style="margin-bottom:0.8rem; font-size:0.88rem;"><strong style="color:var(--text)">Table 1: Benchmark settings</strong> — both evaluation settings used in the paper.</p>
+      <p class="table-title"><strong style="color:var(--text)">Table 1: Setting (i), comprehensive benchmark</strong> - values are PSNR↑ / SSIM↑ / LPIPS↓ / FID↓ from the paper.</p>
+      <p class="table-subtitle">Rain1400, Outdoor-Rain, Raindrop, UHDSnow, SOTS</p>
       <div class="table-wrap">
-        <table>
+        <table style="min-width:1780px;">
           <thead>
-            <tr>
-              <th style="text-align:left; min-width:120px;">Setting</th>
-              <th>Tasks</th>
-              <th># Tasks</th>
-              <th>Role</th>
-            </tr>
+            <tr><th rowspan="2" style="text-align:left; min-width:120px;">Method</th><th colspan="4" class="task-header">Rain1400</th><th colspan="4" class="task-header">Outdoor-Rain</th><th colspan="4" class="task-header">Raindrop</th><th colspan="4" class="task-header">UHDSnow</th><th colspan="4" class="task-header">SOTS</th></tr>
+            <tr><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td class="method-col">Setting (i)</td>
-              <td>Rain1400, Outdoor-Rain, Raindrop, UHDSnow, BSD68, LoL, UHDM, HDR-Eye</td>
-              <td>8</td>
-              <td>Comprehensive all-in-one restoration benchmark</td>
-            </tr>
-            <tr class="ours-row">
-              <td class="method-col">Setting (ii)</td>
-              <td>BSD68, GoPro, LoL, Rain100L, SOTS</td>
-              <td>5</td>
-              <td>Standard 5-task all-in-one benchmark</td>
-            </tr>
+            <tr><td class="method-col">AirNet</td><td>24.32</td><td>.764</td><td>.207</td><td>85.49</td><td>16.39</td><td>.600</td><td>.457</td><td>200.99</td><td>21.91</td><td>.832</td><td>.191</td><td>119.98</td><td>22.14</td><td>.780</td><td>.232</td><td>106.28</td><td>26.57</td><td>.925</td><td>.056</td><td>19.97</td></tr>
+            <tr><td class="method-col">PromptIR</td><td>25.40</td><td>.798</td><td>.176</td><td>73.90</td><td>17.22</td><td>.614</td><td>.445</td><td>190.44</td><td>22.79</td><td>.836</td><td>.174</td><td>119.66</td><td>23.12</td><td>.847</td><td>.177</td><td>82.21</td><td>28.90</td><td>.974</td><td>.016</td><td>4.26</td></tr>
+            <tr><td class="method-col">DA-CLIP</td><td>25.89</td><td>.816</td><td>.158</td><td>63.91</td><td>15.15</td><td>.544</td><td>.483</td><td>191.80</td><td>29.74</td><td>.896</td><td>.052</td><td>34.25</td><td>31.43</td><td>.944</td><td>.042</td><td>18.76</td><td>30.94</td><td>.965</td><td>.016</td><td>4.67</td></tr>
+            <tr><td class="method-col">AdaIR</td><td>24.52</td><td>.760</td><td>.205</td><td>83.96</td><td>16.96</td><td>.611</td><td>.445</td><td>191.35</td><td>23.00</td><td>.840</td><td>.174</td><td>121.01</td><td>22.47</td><td>.792</td><td>.222</td><td>99.96</td><td>27.56</td><td>.939</td><td>.041</td><td>11.36</td></tr>
+            <tr><td class="method-col">DCPT</td><td>25.25</td><td>.792</td><td>.184</td><td>79.31</td><td>13.51</td><td>.554</td><td>.501</td><td>199.03</td><td>18.28</td><td>.788</td><td>.199</td><td>118.58</td><td>22.95</td><td>.837</td><td>.189</td><td>89.27</td><td>29.58</td><td>.973</td><td>.016</td><td>4.44</td></tr>
+            <tr><td class="method-col">MoCE-IR</td><td>24.70</td><td>.773</td><td>.203</td><td>87.27</td><td>16.66</td><td>.610</td><td>.449</td><td>191.79</td><td>22.40</td><td>.829</td><td>.178</td><td>117.44</td><td>22.56</td><td>.812</td><td>.217</td><td>101.85</td><td>30.08</td><td>.975</td><td>.014</td><td>4.22</td></tr>
+            <tr><td class="method-col">VLU-Net</td><td>24.55</td><td>.765</td><td>.201</td><td>84.64</td><td>17.02</td><td>.612</td><td>.446</td><td>190.74</td><td>22.88</td><td>.837</td><td>.179</td><td>115.29</td><td>22.38</td><td>.784</td><td>.229</td><td>103.67</td><td>27.68</td><td>.941</td><td>.043</td><td>12.44</td></tr>
+            <tr><td class="method-col">DiffUIR</td><td>30.19</td><td>.903</td><td>.072</td><td>25.52</td><td>14.74</td><td>.603</td><td>.431</td><td>132.02</td><td>23.50</td><td>.844</td><td>.170</td><td>113.43</td><td>29.41</td><td>.943</td><td>.056</td><td>27.59</td><td>31.11</td><td>.976</td><td>.011</td><td>9.53</td></tr>
+            <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td><td>29.36</td><td>.893</td><td>.080</td><td>29.64</td><td>22.50</td><td>.815</td><td>.187</td><td>55.75</td><td>28.74</td><td>.904</td><td>.082</td><td>45.66</td><td>28.62</td><td>.925</td><td>.068</td><td>30.54</td><td>26.02</td><td>.938</td><td>.034</td><td>8.89</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-subtitle">BSD68, LoL, UHDM, HDR-Eye, Average</p>
+      <div class="table-wrap">
+        <table style="min-width:1780px;">
+          <thead>
+            <tr><th rowspan="2" style="text-align:left; min-width:120px;">Method</th><th colspan="4" class="task-header">BSD68</th><th colspan="4" class="task-header">LoL</th><th colspan="4" class="task-header">UHDM</th><th colspan="4" class="task-header">HDR-Eye</th><th colspan="4" class="task-header">Average</th></tr>
+            <tr><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="method-col">AirNet</td><td>26.17</td><td>.636</td><td>.429</td><td>74.70</td><td>24.01</td><td>.720</td><td>.278</td><td>97.91</td><td>18.22</td><td>.698</td><td>.234</td><td>54.89</td><td>16.04</td><td>.753</td><td>.175</td><td>62.10</td><td>21.75</td><td>.745</td><td>.251</td><td>91.37</td></tr>
+            <tr><td class="method-col">PromptIR</td><td>22.32</td><td>.445</td><td>.564</td><td>83.77</td><td>25.23</td><td>.771</td><td>.228</td><td>97.15</td><td>18.57</td><td>.703</td><td>.223</td><td>53.04</td><td>16.18</td><td>.740</td><td>.172</td><td>55.49</td><td>22.19</td><td>.748</td><td>.242</td><td>84.44</td></tr>
+            <tr><td class="method-col">DA-CLIP</td><td>27.98</td><td>.777</td><td>.190</td><td>60.57</td><td>26.57</td><td>.804</td><td>.210</td><td>124.59</td><td>18.61</td><td>.727</td><td>.222</td><td>54.06</td><td>16.65</td><td>.785</td><td>.162</td><td>58.48</td><td>24.77</td><td>.806</td><td>.171</td><td>67.90</td></tr>
+            <tr><td class="method-col">AdaIR</td><td>23.04</td><td>.478</td><td>.546</td><td>83.58</td><td>22.14</td><td>.734</td><td>.256</td><td>102.82</td><td>18.76</td><td>.719</td><td>.222</td><td>52.09</td><td>17.34</td><td>.784</td><td>.165</td><td>56.88</td><td>21.75</td><td>.740</td><td>.253</td><td>89.22</td></tr>
+            <tr><td class="method-col">DCPT</td><td>22.38</td><td>.457</td><td>.566</td><td>82.82</td><td>26.02</td><td>.789</td><td>.212</td><td>100.60</td><td>17.81</td><td>.715</td><td>.230</td><td>54.91</td><td>13.96</td><td>.799</td><td>.186</td><td>64.68</td><td>21.08</td><td>.745</td><td>.254</td><td>88.18</td></tr>
+            <tr><td class="method-col">MoCE-IR</td><td>25.31</td><td>.587</td><td>.456</td><td>76.79</td><td>27.50</td><td>.836</td><td>.169</td><td>96.04</td><td>18.54</td><td>.708</td><td>.226</td><td>53.47</td><td>16.25</td><td>.758</td><td>.172</td><td>56.03</td><td>22.67</td><td>.765</td><td>.232</td><td>87.21</td></tr>
+            <tr><td class="method-col">VLU-Net</td><td>23.45</td><td>.495</td><td>.516</td><td>81.66</td><td>21.09</td><td>.820</td><td>.175</td><td>97.94</td><td>18.71</td><td>.719</td><td>.222</td><td>52.48</td><td>16.44</td><td>.750</td><td>.171</td><td>55.43</td><td>21.58</td><td>.747</td><td>.242</td><td>88.25</td></tr>
+            <tr><td class="method-col">DiffUIR</td><td>20.41</td><td>.558</td><td>.473</td><td>86.91</td><td>19.35</td><td>.809</td><td>.180</td><td>89.85</td><td>18.57</td><td>.737</td><td>.208</td><td>48.62</td><td>17.41</td><td>.815</td><td>.149</td><td>54.28</td><td>22.74</td><td>.799</td><td>.194</td><td>65.31</td></tr>
+            <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td><td>28.36</td><td>.858</td><td>.178</td><td>48.78</td><td>26.83</td><td>.833</td><td>.139</td><td>69.76</td><td>21.59</td><td>.847</td><td>.114</td><td>26.45</td><td>23.29</td><td>.870</td><td>.148</td><td>54.36</td><td>26.15</td><td>.876</td><td>.114</td><td>41.09</td></tr>
           </tbody>
         </table>
       </div>
 
-      <p style="margin-bottom:0.8rem; font-size:0.88rem;"><strong style="color:var(--text)">Table 2: Setting (ii) average performance</strong> — average over BSD68, GoPro, LoL, Rain100L, and SOTS. <span style="color:var(--text); font-weight:600;">Bold</span> = best, <span style="color:var(--accent2); text-decoration:underline;">underline</span> = second best.</p>
+      <p class="table-title"><strong style="color:var(--text)">Table 2: Setting (ii), standard 5-task benchmark</strong> - values are PSNR↑ / SSIM↑ / LPIPS↓ / FID↓ from the paper.</p>
+      <p class="table-subtitle">BSD68, GoPro, LoL</p>
       <div class="table-wrap">
-        <table>
+        <table style="min-width:1120px;">
           <thead>
-            <tr>
-              <th style="text-align:left; min-width:120px;">Method</th>
-              <th>PSNR↑</th>
-              <th>SSIM↑</th>
-              <th>LPIPS↓</th>
-              <th>FID↓</th>
-            </tr>
+            <tr><th rowspan="2" style="text-align:left; min-width:120px;">Method</th><th colspan="4" class="task-header">BSD68</th><th colspan="4" class="task-header">GoPro</th><th colspan="4" class="task-header">LoL</th></tr>
+            <tr><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th></tr>
           </thead>
           <tbody>
-            <tr><td class="method-col">AirNet</td><td>25.67</td><td>.786</td><td>.237</td><td>58.91</td></tr>
-            <tr><td class="method-col">PromptIR</td><td>26.25</td><td>.771</td><td>.238</td><td>54.22</td></tr>
-            <tr><td class="method-col">AdaIR</td><td>26.11</td><td>.777</td><td>.236</td><td>59.22</td></tr>
-            <tr><td class="method-col">MoCE-IR</td><td class="second">28.52</td><td class="second">.834</td><td class="second">.185</td><td class="second">52.18</td></tr>
-            <tr><td class="method-col">DiffUIR</td><td>25.35</td><td>.817</td><td>.206</td><td>61.36</td></tr>
-            <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td><td class="best">28.39</td><td class="best">.882</td><td class="best">.094</td><td class="best">31.05</td></tr>
+            <tr><td class="method-col">AirNet</td><td>26.17</td><td>.636</td><td>.429</td><td>74.70</td><td>22.85</td><td>.766</td><td>.275</td><td>60.57</td><td>24.01</td><td>.720</td><td>.278</td><td>97.91</td></tr>
+            <tr><td class="method-col">PromptIR</td><td>22.32</td><td>.445</td><td>.564</td><td>83.77</td><td>22.65</td><td>.763</td><td>.276</td><td>59.29</td><td>25.23</td><td>.771</td><td>.228</td><td>97.15</td></tr>
+            <tr><td class="method-col">AdaIR</td><td>23.04</td><td>.478</td><td>.546</td><td>83.58</td><td>28.98</td><td>.878</td><td>.161</td><td>28.23</td><td>22.14</td><td>.734</td><td>.256</td><td>102.82</td></tr>
+            <tr><td class="method-col">DCPT</td><td>22.38</td><td>.457</td><td>.566</td><td>82.82</td><td>22.20</td><td>.799</td><td>.242</td><td>45.09</td><td>26.02</td><td>.789</td><td>.212</td><td>100.60</td></tr>
+            <tr><td class="method-col">MoCE-IR</td><td>25.31</td><td>.587</td><td>.456</td><td>76.79</td><td>30.46</td><td>.907</td><td>.125</td><td>22.36</td><td>27.50</td><td>.836</td><td>.169</td><td>96.04</td></tr>
+            <tr><td class="method-col">VLU-Net</td><td>23.45</td><td>.495</td><td>.516</td><td>81.66</td><td>28.25</td><td>.860</td><td>.184</td><td>34.67</td><td>21.09</td><td>.820</td><td>.175</td><td>97.94</td></tr>
+            <tr><td class="method-col">DiffUIR</td><td>20.41</td><td>.558</td><td>.473</td><td>86.91</td><td>27.62</td><td>.844</td><td>.201</td><td>40.99</td><td>19.35</td><td>.809</td><td>.180</td><td>89.85</td></tr>
+            <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td><td>29.21</td><td>.846</td><td>.139</td><td>39.99</td><td>25.91</td><td>.796</td><td>.153</td><td>32.87</td><td>29.13</td><td>.883</td><td>.083</td><td>45.75</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-subtitle">Rain100L, SOTS, Average</p>
+      <div class="table-wrap">
+        <table style="min-width:1120px;">
+          <thead>
+            <tr><th rowspan="2" style="text-align:left; min-width:120px;">Method</th><th colspan="4" class="task-header">Rain100L</th><th colspan="4" class="task-header">SOTS</th><th colspan="4" class="task-header">Average</th></tr>
+            <tr><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="method-col">AirNet</td><td>28.76</td><td>.881</td><td>.147</td><td>41.40</td><td>26.57</td><td>.925</td><td>.056</td><td>19.97</td><td>25.67</td><td>.786</td><td>.237</td><td>58.91</td></tr>
+            <tr><td class="method-col">PromptIR</td><td>32.16</td><td>.902</td><td>.105</td><td>26.64</td><td>28.90</td><td>.974</td><td>.016</td><td>4.26</td><td>26.25</td><td>.771</td><td>.238</td><td>54.22</td></tr>
+            <tr><td class="method-col">AdaIR</td><td>28.85</td><td>.858</td><td>.177</td><td>70.13</td><td>27.56</td><td>.939</td><td>.041</td><td>11.36</td><td>26.11</td><td>.777</td><td>.236</td><td>59.22</td></tr>
+            <tr><td class="method-col">DCPT</td><td>30.61</td><td>.899</td><td>.119</td><td>42.12</td><td>29.58</td><td>.973</td><td>.016</td><td>4.44</td><td>26.16</td><td>.783</td><td>.231</td><td>55.01</td></tr>
+            <tr><td class="method-col">MoCE-IR</td><td>29.26</td><td>.863</td><td>.160</td><td>61.48</td><td>30.08</td><td>.975</td><td>.014</td><td>4.22</td><td>28.52</td><td>.834</td><td>.185</td><td>52.18</td></tr>
+            <tr><td class="method-col">VLU-Net</td><td>31.70</td><td>.897</td><td>.115</td><td>34.55</td><td>27.68</td><td>.941</td><td>.043</td><td>12.44</td><td>26.43</td><td>.803</td><td>.207</td><td>52.25</td></tr>
+            <tr><td class="method-col">DiffUIR</td><td>28.26</td><td>.898</td><td>.165</td><td>79.52</td><td>31.11</td><td>.976</td><td>.011</td><td>9.53</td><td>25.35</td><td>.817</td><td>.206</td><td>61.36</td></tr>
+            <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td><td>31.01</td><td>.943</td><td>.060</td><td>28.89</td><td>26.67</td><td>.942</td><td>.033</td><td>7.76</td><td>28.39</td><td>.882</td><td>.094</td><td>31.05</td></tr>
           </tbody>
         </table>
       </div>
     </div>
-
     <div class="visual-results">
       <div class="visual-copy">
         <div class="section-label">Qualitative Results</div>
-        <h2>Setting (ii) Visual Results</h2>
+        <h2>Setting (i) Visual Results</h2>
         <div class="section-divider"></div>
-        <p>Use the tabs to switch between available Setting (ii) examples, and drag the slider to compare degraded input with our restored output.</p>
+        <p>Use the tabs to switch between all Setting (i) test sets. All visual results are loaded from the local image folder.</p>
       </div>
 
       <!-- Task tabs -->
       <div class="task-tabs" id="taskTabs">
-        <button class="tab-btn active" data-task="CBSD68" onclick="switchTask(this)">BSD68 (Noise)</button>
+        <button class="tab-btn active" data-task="Rain1400" onclick="switchTask(this)">Rain1400</button>
+        <button class="tab-btn" data-task="Outdoor-Rain" onclick="switchTask(this)">Outdoor-Rain</button>
+        <button class="tab-btn" data-task="Raindrop" onclick="switchTask(this)">Raindrop</button>
+        <button class="tab-btn" data-task="UHDSnow" onclick="switchTask(this)">UHDSnow</button>
         <button class="tab-btn" data-task="SOTS" onclick="switchTask(this)">SOTS (Haze)</button>
+        <button class="tab-btn" data-task="CBSD68" onclick="switchTask(this)">BSD68 (Noise)</button>
         <button class="tab-btn" data-task="LoL" onclick="switchTask(this)">LoL (Low-light)</button>
+        <button class="tab-btn" data-task="UHDM" onclick="switchTask(this)">UHDM (Moire)</button>
+        <button class="tab-btn" data-task="HDR-Eye" onclick="switchTask(this)">HDR-Eye</button>
       </div>
       <!-- Slider mode toggle: degraded vs ours, or ours vs gt -->
     <div class="three-toggle">
@@ -765,15 +812,21 @@
 
 <script>
 // ── Image assets ──────────────────────────────────────────────────────────────
-const BASE = 'https://raw.githubusercontent.com/Fightforql/tmp/main/image/';
+const BASE = 'image/';
 const tasks = {
-  'CBSD68':       { label: 'Denoising (BSD68)' },
+  'Rain1400':     { label: 'Deraining (Rain1400)' },
+  'Outdoor-Rain': { label: 'Deraining (Outdoor-Rain)' },
+  'Raindrop':     { label: 'Raindrop Removal' },
+  'UHDSnow':      { label: 'Snow Removal (UHDSnow)' },
   'SOTS':         { label: 'Dehazing (SOTS)' },
+  'CBSD68':       { label: 'Denoising (BSD68)' },
   'LoL':          { label: 'Low-light Enhancement (LoL)' },
+  'UHDM':         { label: 'Demoireing (UHDM)' },
+  'HDR-Eye':      { label: 'HDR Reconstruction (HDR-Eye)' },
 };
 
 // ── Slider state ──────────────────────────────────────────────────────────────
-let currentTask = 'CBSD68';
+let currentTask = 'Rain1400';
 let sliderMode  = 'deg-ours'; // 'deg-ours' | 'ours-gt'
 let dragging    = false;
 
@@ -884,7 +937,7 @@ function copyBib() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-loadTask('CBSD68');
+loadTask('Rain1400');
 </script>
 </body>
 </html>
