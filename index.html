@@ -6,562 +6,690 @@
 <title>SLAIR: Structured Latent Flow Matching for All-in-One Image Restoration</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* ── Reset & base ── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg:        #f8fafc;
-    --bg2:       #ffffff;
-    --bg3:       #eef2f7;
-    --border:    rgba(15,23,42,0.12);
-    --accent:    #2563eb;
-    --accent2:   #7c3aed;
-    --amber:     #d97706;
-    --text:      #111827;
-    --muted:     #475569;
-    --dim:       #64748b;
-    --card-bg:   rgba(255,255,255,0.78);
-    --r:         14px;
-  }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.7;
-    overflow-x: hidden;
-  }
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── Nav ── */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(255,255,255,0.86);
-    backdrop-filter: blur(18px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    height: 56px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .nav-brand {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-    color: var(--accent);
-    letter-spacing: 0.05em;
-    font-weight: 500;
-  }
-  .nav-links { display: flex; gap: 1.8rem; }
-  .nav-links a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.82rem;
-    letter-spacing: 0.03em;
-    transition: color 0.2s;
-    font-weight: 500;
-  }
-  .nav-links a:hover { color: var(--text); }
+:root {
+  --bg:       #f9fafb;
+  --bg2:      #ffffff;
+  --bg3:      #f1f4f8;
+  --border:   rgba(15,23,42,0.10);
+  --border2:  rgba(15,23,42,0.06);
+  --accent:   #2563eb;
+  --accent2:  #7c3aed;
+  --amber:    #d97706;
+  --text:     #0f172a;
+  --muted:    #4b5563;
+  --dim:      #94a3b8;
+  --r:        12px;
+  --section-gap: 100px;
+}
 
-  /* ── Hero ── */
-  .hero {
-    min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    text-align: center;
-    padding: 80px 2rem 60px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero-glow {
-    position: absolute; inset: 0; pointer-events: none;
-    background:
-      linear-gradient(180deg, rgba(37,99,235,0.08) 0%, rgba(248,250,252,0) 56%),
-      radial-gradient(ellipse 50% 36% at 78% 24%, rgba(217,119,6,0.10) 0%, transparent 68%);
-  }
-  .hero-inner { position: relative; max-width: 860px; }
-  .venue-badge {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    background: rgba(91,143,255,0.12);
-    border: 1px solid rgba(91,143,255,0.3);
-    padding: 0.3rem 1rem;
-    border-radius: 100px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    color: var(--accent);
-    margin-bottom: 1.6rem;
-    text-transform: uppercase;
-  }
-  .venue-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
-  h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2rem, 5vw, 3.4rem);
-    font-weight: 800;
-    line-height: 1.18;
-    letter-spacing: -0.02em;
-    margin-bottom: 1.6rem;
-    background: linear-gradient(135deg, #0f172a 0%, #2563eb 54%, #7c3aed 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .authors {
-    font-size: 0.95rem;
-    color: var(--muted);
-    margin-bottom: 0.6rem;
-    line-height: 1.9;
-  }
-  .authors a { color: var(--text); text-decoration: none; border-bottom: 1px solid rgba(37,99,235,0.22); transition: border-color 0.2s; }
-  .authors a:hover { border-color: var(--accent); }
-  .authors sup { color: var(--accent); font-size: 0.7em; }
-  .affiliations {
-    font-size: 0.8rem;
-    color: var(--dim);
-    margin-bottom: 1.8rem;
-  }
-  .hero-links { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 0.45rem;
-    padding: 0.6rem 1.35rem;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-    letter-spacing: 0.02em;
-  }
-  .btn:hover { transform: translateY(-2px); }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    box-shadow: 0 4px 18px rgba(91,143,255,0.4);
-  }
-  .btn-primary:hover { box-shadow: 0 6px 24px rgba(91,143,255,0.55); }
-  .btn-outline {
-    background: transparent;
-    border: 1.5px solid var(--border);
-    color: var(--text);
-  }
-  .btn-outline:hover { border-color: rgba(37,99,235,0.35); background: var(--card-bg); }
-  .btn-ghost {
-    background: rgba(167,139,250,0.1);
-    border: 1.5px solid rgba(167,139,250,0.25);
-    color: var(--accent2);
-  }
-  .btn-ghost:hover { background: rgba(167,139,250,0.18); }
+html { scroll-behavior: smooth; }
 
-  /* ── Section ── */
-  section { padding: 90px 2rem; }
-  .container { max-width: 1100px; margin: 0 auto; }
-  .section-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.7rem;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.5rem, 3vw, 2.4rem);
-    font-weight: 700;
-    line-height: 1.25;
-    margin-bottom: 1.2rem;
-    letter-spacing: -0.015em;
-  }
-  .section-divider { width: 48px; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; margin-bottom: 2.5rem; }
-  p { color: var(--muted); font-size: 0.97rem; margin-bottom: 1rem; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* ── Abstract ── */
-  #abstract { background: var(--bg2); }
-  .abstract-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 2.5rem 3rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .abstract-card::before {
-    content: "";
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
-  }
-  .abstract-card p { font-size: 1rem; line-height: 1.85; color: var(--muted); margin: 0; }
-  .abstract-card strong { color: var(--text); font-weight: 600; }
+/* ── Nav ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.90);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2.5rem;
+  height: 54px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.nav-links { display: flex; gap: 2rem; }
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+.nav-links a:hover { color: var(--text); }
 
-  /* ── Teaser ── */
-  #teaser { padding: 70px 2rem; }
-  .teaser-img-wrap {
-    border-radius: var(--r);
-    overflow: hidden;
-    border: 1px solid var(--border);
-    box-shadow: 0 18px 48px rgba(15,23,42,0.12);
-  }
-  .teaser-img-wrap img { width: 100%; display: block; }
-  .fig-caption {
-    text-align: center;
-    font-size: 0.83rem;
-    color: var(--dim);
-    margin-top: 1rem;
-    font-style: italic;
-  }
+/* ── Hero ── */
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 90px 2rem 70px;
+  position: relative;
+  background: var(--bg2);
+}
+.hero-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(37,99,235,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 20%, rgba(124,58,237,0.05) 0%, transparent 60%);
+}
+.hero-inner { position: relative; max-width: 820px; }
 
-  /* ── Method ── */
-  #method { background: var(--bg2); }
-  .method-container { max-width: 1220px; }
-  .method-img-wrap {
-    border-radius: var(--r);
-    overflow: hidden;
-    border: 1px solid var(--border);
-    background: white;
-    padding: 1.1rem;
-    box-shadow: 0 24px 64px rgba(15,23,42,0.14);
-    margin-bottom: 1rem;
-  }
-  .method-img-wrap img { width: 100%; display: block; }
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-  .feature-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.35rem;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .feature-card:hover { border-color: rgba(91,143,255,0.25); background: rgba(91,143,255,0.04); }
-  .feature-icon {
-    width: 42px; height: 42px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.3rem; margin-bottom: 0.9rem;
-  }
-  .feature-icon.blue { background: rgba(91,143,255,0.15); }
-  .feature-icon.purple { background: rgba(167,139,250,0.15); }
-  .feature-icon.amber { background: rgba(245,158,11,0.15); }
-  .feature-card h4 { font-size: 0.98rem; font-weight: 700; margin-bottom: 0.55rem; color: var(--text); }
-  .feature-card p { font-size: 0.86rem; margin: 0; line-height: 1.65; }
-  .method-side-caption { text-align: left; margin-top: 0.85rem; }
+.venue-badge {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  background: rgba(37,99,235,0.07);
+  border: 1px solid rgba(37,99,235,0.18);
+  padding: 0.28rem 0.9rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 1.8rem;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.venue-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; } 50% { opacity:0.4; }
+}
 
-  /* ── Results / Slider ── */
-  #results { padding: 90px 2rem; }
-  .visual-results { margin-top: 3.2rem; }
-  .visual-copy { display: block; }
-  .task-tabs {
-    display: flex; flex-wrap: wrap; gap: 0.5rem;
-    margin-bottom: 2rem;
-  }
-  .tab-btn {
-    padding: 0.4rem 1rem;
-    border-radius: 6px;
-    font-size: 0.8rem; font-weight: 600;
-    letter-spacing: 0.03em;
-    cursor: pointer;
-    border: 1.5px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    transition: all 0.15s;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .tab-btn:hover { border-color: rgba(91,143,255,0.4); color: var(--text); }
-  .tab-btn.active {
-    background: rgba(91,143,255,0.15);
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  /* Slider widget */
-  .slider-wrap {
-    position: relative;
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    border-radius: var(--r);
-    overflow: hidden;
-    box-shadow: 0 20px 54px rgba(15,23,42,0.16);
-    border: 1px solid var(--border);
-    user-select: none;
-    cursor: ew-resize;
-  }
-  .slider-base-img, .slider-overlay-img {
-    display: block;
-    width: 100%;
-    pointer-events: none;
-  }
-  .slider-overlay-container {
-    position: absolute; top: 0; left: 0; bottom: 0;
-    overflow: hidden;
-    width: 50%;
-    will-change: width;
-  }
-  .slider-overlay-img {
-    position: absolute; top: 0; left: 0;
-    width: 900px; max-width: none;
-  }
-  .slider-divider {
-    position: absolute; top: 0; bottom: 0;
-    left: 50%; width: 3px;
-    background: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    transform: translateX(-50%);
-    will-change: left;
-  }
-  .slider-handle {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    background: white;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.4);
-    display: flex; align-items: center; justify-content: center;
-    color: #0b0f1a; font-size: 0.75rem; font-weight: 700;
-    will-change: left;
-    pointer-events: none;
-  }
-  .slider-handle svg { width: 22px; height: 22px; }
-  .slider-label-left, .slider-label-right {
-    position: absolute; bottom: 1rem;
-    padding: 0.3rem 0.7rem;
-    border-radius: 6px;
-    font-size: 0.75rem; font-weight: 700;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    pointer-events: none;
-  }
-  .slider-label-left { left: 1rem; background: rgba(0,0,0,0.6); color: #f87171; }
-  .slider-label-right { right: 1rem; background: rgba(0,0,0,0.6); color: #4ade80; }
-  .slider-hint {
-    text-align: center; font-size: 0.78rem; color: var(--dim);
-    margin-top: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;
-  }
-  /* Three-way toggle (Degraded / Ours / GT) */
-  .three-toggle {
-    display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;
-  }
-  .three-btn {
-    padding: 0.35rem 0.9rem;
-    border-radius: 6px;
-    font-size: 0.78rem; font-weight: 600;
-    cursor: pointer;
-    border: 1.5px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    transition: all 0.15s;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .three-btn.active { background: rgba(91,143,255,0.15); border-color: var(--accent); color: var(--accent); }
-  .method-gallery {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(210px, 26%);
-    gap: 0.75rem;
-    overflow-x: auto;
-    padding: 0.2rem 0 1rem;
-    margin-top: 2rem;
-    scroll-snap-type: x mandatory;
-  }
-  .method-gallery::-webkit-scrollbar,
-  .table-wrap::-webkit-scrollbar { height: 10px; }
-  .method-gallery::-webkit-scrollbar-thumb,
-  .table-wrap::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.24); border-radius: 99px; }
-  .method-gallery::-webkit-scrollbar-track,
-  .table-wrap::-webkit-scrollbar-track { background: rgba(15,23,42,0.05); border-radius: 99px; }
-  .gallery-cell {
-    scroll-snap-align: start;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    background: var(--bg2);
-  }
-  .gallery-cell img { width: 100%; display: block; aspect-ratio: 762 / 512; object-fit: cover; }
-  .gallery-cell-label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    font-size: 0.74rem;
-    font-weight: 700;
-    color: var(--dim);
-    padding: 0.48rem 0.65rem;
-    background: var(--bg3);
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.03em;
-  }
-  .gallery-cell.ours {
-    border-color: rgba(37,99,235,0.45);
-    box-shadow: 0 14px 36px rgba(37,99,235,0.14);
-  }
-  .gallery-cell.ours .gallery-cell-label { color: var(--accent); background: rgba(37,99,235,0.08); }
-  .gallery-note {
-    font-size: 0.8rem;
-    color: var(--dim);
-    margin-top: -0.35rem;
-  }
-  .paper-visual-wrap {
-    margin-top: 2.4rem;
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    background: var(--bg2);
-    overflow: hidden;
-    box-shadow: 0 18px 48px rgba(15,23,42,0.12);
-  }
-  .paper-visual-wrap img { width: 100%; display: block; }
-  .paper-visual-caption {
-    padding: 0.75rem 1rem;
-    margin: 0;
-    text-align: center;
-    font-size: 0.82rem;
-    color: var(--dim);
-  }
+h1 {
+  font-size: clamp(1.9rem, 4.5vw, 3.1rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  margin-bottom: 1.8rem;
+  color: var(--text);
+}
+h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-  /* ── Quantitative ── */
-  #quantitative { scroll-margin-top: 72px; }
-  .benchmark-block { margin-bottom: 3rem; }
-  .metrics-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-  }
-  .metric-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 1.2rem 1rem;
-    text-align: center;
-  }
-  .metric-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.9rem;
-    font-weight: 700;
-    line-height: 1;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .metric-label { font-size: 0.8rem; color: var(--dim); margin-top: 0.4rem; font-weight: 500; }
-  .table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    background: var(--bg2);
-    margin-bottom: 2.2rem;
-  }
-  .table-title { margin-bottom:0.8rem; font-size:0.88rem; }
-  .table-subtitle { margin: 1rem 0 0.65rem; font-size: 0.82rem; color: var(--dim); }
-  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 700px; }
-  .combined-table { min-width: 1860px; }
-  th {
-    background: var(--bg3);
-    padding: 0.75rem 1rem;
-    text-align: center;
-    font-weight: 600;
-    color: var(--muted);
-    letter-spacing: 0.03em;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.78rem;
-    white-space: nowrap;
-  }
-  th.task-header { background: rgba(91,143,255,0.08); color: var(--accent); font-family: 'JetBrains Mono', monospace; }
-  th.setting-band {
-    background: #111827;
-    color: white;
-    text-align: left;
-    font-family: 'Inter', sans-serif;
-    letter-spacing: 0.02em;
-  }
-  td {
-    padding: 0.65rem 1rem;
-    text-align: center;
-    border-bottom: 1px solid rgba(15,23,42,0.07);
-    color: var(--muted);
-    white-space: nowrap;
-  }
-  tr:last-child td { border-bottom: none; }
-  td.setting-col {
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    text-align: left;
-  }
-  td.method-col { text-align: left; font-weight: 600; color: var(--text); font-size: 0.85rem; }
-  tr.ours-row td { background: rgba(91,143,255,0.06); }
-  tr.ours-row td.method-col { color: var(--accent); }
-  td.best { font-weight: 800; color: var(--text); }
-  td.second {
-    color: #6d28d9;
-    text-decoration: underline;
-    text-decoration-thickness: 1.5px;
-    text-underline-offset: 2px;
-    text-decoration-color: rgba(109,40,217,0.55);
-  }
+.authors {
+  font-size: 0.94rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+  line-height: 2;
+}
+.authors a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(37,99,235,0.2);
+  transition: border-color 0.2s;
+}
+.authors a:hover { border-color: var(--accent); }
+.authors sup { color: var(--accent); font-size: 0.68em; font-weight: 600; }
 
-  /* ── BibTeX ── */
-  #bibtex { padding: 80px 2rem; }
-  .bib-block {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 1.5rem 2rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-    color: var(--muted);
-    line-height: 1.8;
-    position: relative;
-    overflow: hidden;
-  }
-  .bib-block .key { color: var(--accent); }
-  .bib-block .val { color: #0369a1; }
-  .bib-block .brace { color: var(--accent2); }
-  .copy-btn {
-    position: absolute; top: 1rem; right: 1rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.73rem; font-weight: 600;
-    cursor: pointer;
-    border: 1.5px solid var(--border);
-    background: var(--bg2);
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-    transition: all 0.15s;
-  }
-  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+.affiliations {
+  font-size: 0.79rem;
+  color: var(--dim);
+  margin-bottom: 2rem;
+  line-height: 1.9;
+}
 
-  /* ── Footer ── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 2rem;
-    text-align: center;
-    font-size: 0.8rem;
-    color: var(--dim);
-  }
-  footer a { color: var(--muted); text-decoration: none; }
-  footer a:hover { color: var(--text); }
+.hero-links { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
 
-  /* ── Utility ── */
-  .text-center { text-align: center; }
-  .mt-2 { margin-top: 2rem; }
-  .mt-1 { margin-top: 1rem; }
+.btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+  letter-spacing: 0.01em;
+}
+.btn:hover { transform: translateY(-1px); }
 
-  @media (max-width: 640px) {
-    .nav-links { display: none; }
-    .abstract-card { padding: 1.5rem; }
-    .method-gallery { grid-auto-columns: minmax(220px, 82%); }
-    .features-grid { grid-template-columns: 1fr; }
-  }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(37,99,235,0.35);
+}
+.btn-primary:hover { box-shadow: 0 4px 20px rgba(37,99,235,0.50); }
+
+.btn-outline {
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.btn-outline:hover { border-color: rgba(37,99,235,0.3); }
+
+.btn-ghost {
+  background: rgba(124,58,237,0.07);
+  border: 1.5px solid rgba(124,58,237,0.18);
+  color: var(--accent2);
+}
+.btn-ghost:hover { background: rgba(124,58,237,0.12); }
+
+/* ── Section base ── */
+section { padding: var(--section-gap) 2rem; }
+.container { max-width: 1100px; margin: 0 auto; }
+.container-wide { max-width: 1240px; margin: 0 auto; }
+
+.section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.65rem;
+}
+
+h2 {
+  font-size: clamp(1.45rem, 2.8vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.9rem;
+}
+
+.rule {
+  width: 36px; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 99px;
+  margin-bottom: 2.2rem;
+}
+
+p { color: var(--muted); font-size: 0.96rem; margin-bottom: 1rem; }
+
+/* ── Fig caption ── */
+.fig-caption {
+  text-align: center;
+  font-size: 0.81rem;
+  color: var(--dim);
+  margin-top: 0.9rem;
+  font-style: italic;
+  line-height: 1.6;
+}
+.fig-caption strong { font-style: normal; color: var(--text); }
+
+/* ── Teaser ── */
+#teaser {
+  background: var(--bg);
+  padding: 56px 2rem 0;
+}
+.teaser-wrap {
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 48px rgba(15,23,42,0.09);
+  background: #fff;
+  padding: 1.2rem;
+}
+.teaser-wrap img { width: 100%; display: block; }
+
+/* ── Abstract ── */
+#abstract { background: var(--bg2); }
+.abstract-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 2.4rem 2.8rem;
+  position: relative;
+  overflow: hidden;
+}
+.abstract-card::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
+}
+.abstract-card p {
+  font-size: 0.99rem; line-height: 1.88;
+  color: var(--muted); margin: 0;
+}
+.abstract-card strong { color: var(--text); font-weight: 600; }
+
+/* ── Method ── */
+#method { background: var(--bg); }
+
+.method-fig {
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 1.2rem;
+  box-shadow: 0 16px 48px rgba(15,23,42,0.09);
+  margin-bottom: 0.85rem;
+}
+.method-fig img { width: 100%; display: block; }
+
+/* ── Three-stage cards ── */
+.stages-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-top: 2.2rem;
+}
+
+.stage-card {
+  background: var(--bg2);
+  padding: 2rem 1.8rem;
+  position: relative;
+  transition: background 0.2s;
+}
+.stage-card:hover { background: #fafbff; }
+
+.stage-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 1rem;
+  letter-spacing: -0.05em;
+}
+.stage-number.blue { color: rgba(37,99,235,0.15); }
+.stage-number.purple { color: rgba(124,58,237,0.15); }
+.stage-number.amber { color: rgba(217,119,6,0.15); }
+
+.stage-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.stage-marker.blue { color: var(--accent); }
+.stage-marker.purple { color: var(--accent2); }
+.stage-marker.amber { color: var(--amber); }
+.stage-marker::before {
+  content: "";
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.stage-card h4 {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.65rem;
+  line-height: 1.35;
+}
+.stage-card p { font-size: 0.85rem; line-height: 1.72; margin: 0; }
+
+/* ── Quantitative ── */
+#quantitative { background: var(--bg2); scroll-margin-top: 60px; }
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--bg2);
+  margin-bottom: 2rem;
+}
+.table-wrap::-webkit-scrollbar { height: 6px; }
+.table-wrap::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.2); border-radius: 99px; }
+.table-wrap::-webkit-scrollbar-track { background: transparent; }
+
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.81rem;
+  min-width: 700px;
+}
+.combined-table { min-width: 1860px; }
+
+/* Setting band — refined, no harsh black */
+th.setting-band {
+  background: linear-gradient(90deg, #1e3a5f 0%, #1d4ed8 100%);
+  color: rgba(255,255,255,0.95);
+  text-align: left;
+  padding: 0.6rem 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-bottom: none;
+}
+th.setting-band span {
+  opacity: 0.7;
+  font-weight: 400;
+  font-size: 0.73rem;
+  margin-left: 0.5rem;
+}
+
+th {
+  background: var(--bg3);
+  padding: 0.65rem 0.9rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.77rem;
+  white-space: nowrap;
+}
+th.task-header {
+  background: rgba(37,99,235,0.05);
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.73rem;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(37,99,235,0.12);
+}
+
+td {
+  padding: 0.58rem 0.9rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border2);
+  color: var(--muted);
+  white-space: nowrap;
+  font-size: 0.81rem;
+}
+tr:last-child td { border-bottom: none; }
+
+td.method-col {
+  text-align: left;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.83rem;
+  min-width: 110px;
+}
+
+tr.ours-row td {
+  background: rgba(37,99,235,0.04);
+}
+tr.ours-row td.method-col {
+  color: var(--accent);
+  font-weight: 700;
+}
+tr.ours-row:hover td { background: rgba(37,99,235,0.07); }
+
+tr:not(.ours-row):hover td { background: rgba(0,0,0,0.015); }
+
+td.best { font-weight: 800; color: var(--text); }
+td.second {
+  font-weight: 500;
+  color: var(--accent2);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(124,58,237,0.45);
+}
+
+.table-label {
+  font-size: 0.88rem;
+  color: var(--text);
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+.table-label span { font-weight: 400; color: var(--muted); }
+
+/* ── Results / Qualitative ── */
+#results { background: var(--bg); }
+
+.task-tabs {
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+  margin-bottom: 1.8rem;
+}
+.tab-btn {
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.77rem; font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  color: var(--muted);
+  transition: all 0.15s;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.02em;
+}
+.tab-btn:hover { border-color: rgba(37,99,235,0.35); color: var(--text); }
+.tab-btn.active {
+  background: rgba(37,99,235,0.08);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Mode toggle ── */
+.mode-toggle {
+  display: inline-flex;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.4rem;
+}
+.mode-btn {
+  padding: 0.38rem 1rem;
+  font-size: 0.79rem; font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.15s;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.02em;
+}
+.mode-btn + .mode-btn {
+  border-left: 1.5px solid var(--border);
+}
+.mode-btn.active {
+  background: rgba(37,99,235,0.08);
+  color: var(--accent);
+}
+
+/* ── Image comparison slider ── */
+.slider-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: 0 20px 56px rgba(15,23,42,0.14);
+  border: 1px solid var(--border);
+  user-select: none;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+.slider-base-img {
+  display: block; width: 100%; pointer-events: none;
+}
+.slider-overlay-container {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  overflow: hidden; width: 50%;
+  will-change: width;
+}
+.slider-overlay-img {
+  position: absolute; top: 0; left: 0;
+  width: 960px; max-width: none;
+  pointer-events: none;
+  display: block;
+}
+.slider-divider {
+  position: absolute; top: 0; bottom: 0;
+  left: 50%; width: 2px;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+  transform: translateX(-50%);
+  will-change: left;
+  pointer-events: none;
+}
+.slider-handle {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  will-change: left;
+  pointer-events: none;
+}
+.slider-handle svg { width: 20px; height: 20px; color: #0f172a; }
+
+.slider-label {
+  position: absolute; bottom: 1rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.73rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+.slider-label-left  { left: 1rem;  background: rgba(0,0,0,0.55); color: #fca5a5; }
+.slider-label-right { right: 1rem; background: rgba(0,0,0,0.55); color: #93c5fd; }
+
+.slider-hint {
+  text-align: center; font-size: 0.77rem; color: var(--dim);
+  margin-top: 0.8rem;
+  display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+}
+
+/* ── Method gallery ── — single scrollable row */
+.gallery-scroll-outer {
+  position: relative;
+  margin-top: 2.2rem;
+}
+.gallery-scroll-outer::after {
+  content: "";
+  position: absolute; top: 0; right: 0; bottom: 16px; width: 60px;
+  background: linear-gradient(to right, transparent, var(--bg));
+  pointer-events: none;
+  border-radius: 0 var(--r) var(--r) 0;
+}
+.method-gallery {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 24%);
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding: 0.15rem 0.15rem 1rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.method-gallery::-webkit-scrollbar { height: 5px; }
+.method-gallery::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.18); border-radius: 99px; }
+.method-gallery::-webkit-scrollbar-track { background: transparent; }
+
+.gallery-cell {
+  scroll-snap-align: start;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+.gallery-cell img {
+  width: 100%; display: block;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+.gallery-cell-label {
+  padding: 0.42rem 0.65rem;
+  font-size: 0.73rem; font-weight: 600;
+  color: var(--dim);
+  background: var(--bg3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.03em;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.gallery-cell.ours { border-color: rgba(37,99,235,0.4); box-shadow: 0 6px 20px rgba(37,99,235,0.1); }
+.gallery-cell.ours .gallery-cell-label { color: var(--accent); background: rgba(37,99,235,0.06); }
+.gallery-cell.gt .gallery-cell-label { color: #16a34a; }
+
+.gallery-hint {
+  font-size: 0.78rem; color: var(--dim);
+  margin-top: 0.3rem;
+  display: flex; align-items: center; gap: 0.3rem;
+}
+
+/* ── BibTeX ── */
+#bibtex { background: var(--bg2); padding: 80px 2rem; }
+.bib-block {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 1.6rem 2rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.81rem;
+  color: var(--muted);
+  line-height: 1.85;
+  position: relative;
+}
+.bib-block .key   { color: var(--accent);  }
+.bib-block .val   { color: #0369a1;        }
+.bib-block .brace { color: var(--accent2); }
+.copy-btn {
+  position: absolute; top: 1rem; right: 1rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.72rem; font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem;
+  text-align: center;
+  font-size: 0.79rem;
+  color: var(--dim);
+  background: var(--bg2);
+}
+footer a { color: var(--muted); text-decoration: none; transition: color 0.15s; }
+footer a:hover { color: var(--text); }
+
+/* ── Utilities ── */
+.mt-2  { margin-top: 2rem; }
+.mt-1  { margin-top: 1rem; }
+
+@media (max-width: 720px) {
+  .nav-links { display: none; }
+  .abstract-card { padding: 1.4rem 1.5rem; }
+  .stages-grid { grid-template-columns: 1fr; }
+  .stage-card { border-top: 1px solid var(--border); }
+  .stage-card:first-child { border-top: none; }
+  h1 { letter-spacing: -0.02em; }
+  .method-gallery { grid-auto-columns: minmax(200px, 80%); }
+}
 </style>
 </head>
 <body>
 
-<!-- ── Navigation ── -->
+<!-- ── Nav ── -->
 <nav>
   <span class="nav-brand">SLAIR</span>
   <div class="nav-links">
     <a href="#abstract">Abstract</a>
     <a href="#method">Method</a>
-    <a href="#results">Results</a>
     <a href="#quantitative">Benchmarks</a>
+    <a href="#results">Results</a>
     <a href="#bibtex">BibTeX</a>
   </div>
 </nav>
@@ -570,35 +698,40 @@
 <header class="hero" id="top">
   <div class="hero-glow"></div>
   <div class="hero-inner">
-    <div class="venue-badge">ECCV 2026</div>
-    <h1>SLAIR: Structured Latent Flow Matching for All-in-One Image Restoration</h1>
+    <div class="venue-badge"><span class="venue-dot"></span>ECCV 2026</div>
+    <h1>SLAIR: <em>Structured Latent</em> Flow Matching for All-in-One Image Restoration</h1>
 
     <p class="authors">
-      <a href="https://fightforql.github.io">Shuyi Liang</a><sup>1,2*</sup>&nbsp;&nbsp;
-      <a href="#">Yixin Yang</a><sup>1,2*</sup>&nbsp;&nbsp;
-      <a href="#">Hanyue Lou</a><sup>1,2</sup>&nbsp;&nbsp;
-      <a href="#">Yuning Cui</a><sup>3</sup>&nbsp;&nbsp;
-      <a href="#">Boxin Shi</a><sup>1,2,4†</sup>
+      <a href="https://fightforql.github.io">Shuyi Liang</a><sup>1,2*</sup>&ensp;
+      <a href="#">Yixin Yang</a><sup>1,2*</sup>&ensp;
+      <a href="#">Hanyue Lou</a><sup>1,2</sup>&ensp;
+      <a href="#">Yuning Cui</a><sup>3</sup>&ensp;
+      <a href="#">Zhaochen Liu</a><sup>1,2</sup>&ensp;
+      <a href="#">Kaiwen Gao</a><sup>1,2</sup>&ensp;
+      <a href="#">Bin Xiao</a><sup>1,2</sup>&ensp;
+      <a href="#">Limeng Qiao</a><sup>1,2</sup>&ensp;
+      <a href="#">Lin Ma</a><sup>4</sup>&ensp;
+      <a href="#">Boxin Shi</a><sup>1,2†</sup>
     </p>
     <p class="affiliations">
-      <sup>1</sup>State Key Laboratory of Multimedia Information Processing, School of Computer Science, Peking University &nbsp;|&nbsp;
-      <sup>2</sup>National Engineering Research Center of Visual Technology, PKU &nbsp;|&nbsp;
-      <sup>3</sup>Technical University of Munich &nbsp;|&nbsp;
-      <sup>4</sup>PKU-AI² Robotics Joint Lab of Embodied AI
-      <br><small>* Equal contribution &nbsp; † Corresponding author</small>
+      <sup>1</sup>State Key Laboratory of Multimedia Information Processing, School of Computer Science, Peking University &nbsp;·&nbsp;
+      <sup>2</sup>National Engineering Research Center of Visual Technology, PKU &nbsp;·&nbsp;
+      <sup>3</sup>Technical University of Munich &nbsp;·&nbsp;
+      <sup>4</sup>Meituan<br>
+      <small>* Equal contribution &ensp; † Corresponding author</small>
     </p>
 
     <div class="hero-links">
       <a class="btn btn-primary" href="https://github.com/Fightforql/SLAIR" target="_blank">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.341-3.369-1.341-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.944 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.74 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.866-.013-1.7-2.782.604-3.369-1.341-3.369-1.341-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.944 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.74 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
         Code
       </a>
       <a class="btn btn-outline" href="#" target="_blank">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
         Paper (ECCV 2026)
       </a>
       <a class="btn btn-ghost" href="#results">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
         Visual Results
       </a>
     </div>
@@ -608,11 +741,12 @@
 <!-- ── Teaser ── -->
 <section id="teaser" style="background:var(--bg); padding:60px 2rem 0;">
   <div class="container">
-    <div class="teaser-img-wrap" style="background:#fff; padding:1.5rem;">
-      <img src="image/teaser.png" alt="SLAIR Teaser: Latent Space Separation and ODE Trajectory">
+    <div class="teaser-wrap">
+      <img src="image/teaser.png" alt="SLAIR Teaser: latent space separation and ODE trajectory">
     </div>
     <p class="fig-caption">
-      <strong style="color:var(--text)">Fig. 1</strong> — (a) t-SNE visualization showing our Degradation VAE cleanly separating 10 degradation types in latent space, versus the entangled original VAE space. (b) ODE trajectory: a degraded image is progressively restored as <em>t</em> evolves from 0→1, with PSNR monotonically improving from 20.93 to 30.43 dB.
+      <strong>Fig. 1</strong> — (a) t-SNE visualization: our Degradation VAE cleanly separates 10 degradation types in latent space, versus the entangled vanilla VAE space.
+      (b) ODE trajectory: a degraded image is progressively restored as <em>t</em> evolves from 0→1, with PSNR monotonically improving from 20.93 to 30.43 dB.
     </p>
   </div>
 </section>
@@ -620,12 +754,19 @@
 <!-- ── Abstract ── -->
 <section id="abstract">
   <div class="container">
-    <div class="section-label">Abstract</div>
+    <div class="section-eyebrow">Abstract</div>
     <h2>Degradation-Agnostic Restoration via Deterministic Latent Transport</h2>
-    <div class="section-divider"></div>
+    <div class="rule"></div>
     <div class="abstract-card">
       <p>
-        Image restoration aims to recover high-quality images from degraded observations, yet existing methods struggle with diverse degradation types. In this work, we propose <strong>SLAIR</strong>, an all-in-one image restoration framework integrating <strong>latent space separation</strong> and <strong>deterministic transport</strong>. We introduce a latent-space separation approach that ensures stable, distinct representations of degraded and clean images, facilitating effective flow matching. By learning continuous transport flow in a latent space via an ordinary differential equation (ODE), our method enables <strong>deterministic restoration without relying on degradation labels or stochastic sampling</strong>. While the restoration is performed in the latent space, a <strong>high-frequency refinement module</strong> is introduced into the latent decoder to handle detail distortion during decoding. Experiments demonstrate that SLAIR outperforms existing approaches in terms of both perceptual quality and computational efficiency, making it a robust solution for scalable, degradation-agnostic image restoration.
+        Image restoration aims to recover high-quality images from degraded observations, yet existing methods struggle with diverse degradation types.
+        In this work, we propose <strong>SLAIR</strong>, an all-in-one image restoration framework integrating <strong>latent space separation</strong> and <strong>deterministic transport</strong>.
+        We introduce a latent-space separation approach that ensures stable, distinct representations of degraded and clean images, facilitating effective flow matching.
+        By learning continuous transport flow in a latent space via an ordinary differential equation (ODE), our method enables
+        <strong>deterministic restoration without relying on degradation labels or stochastic sampling</strong>.
+        While the restoration is performed in the latent space, a <strong>high-frequency refinement module</strong> is introduced into the latent decoder to handle detail distortion during decoding.
+        Experiments demonstrate that SLAIR outperforms existing approaches in terms of both perceptual quality and computational efficiency,
+        making it a robust solution for scalable, degradation-agnostic image restoration.
       </p>
     </div>
   </div>
@@ -633,219 +774,293 @@
 
 <!-- ── Method ── -->
 <section id="method">
-  <div class="container method-container">
-    <div class="section-label">Method</div>
+  <div class="container-wide container">
+    <div class="section-eyebrow">Method</div>
     <h2>Three-Stage Framework</h2>
-    <div class="section-divider"></div>
+    <div class="rule"></div>
 
-    <div class="method-img-wrap">
-      <img src="image/method-cropped.png" alt="SLAIR three-stage framework">
+    <div class="method-fig">
+      <img src="image/method-cropped.png" alt="SLAIR three-stage pipeline">
     </div>
-    <p class="fig-caption method-side-caption">
-      <strong style="color:var(--text)">Fig. 2</strong> - SLAIR first structures degraded and clean latents, then learns deterministic ODE transport with flow matching, and finally restores high-frequency details through a wavelet-aware VAE decoder.
+    <p class="fig-caption">
+      <strong>Fig. 2</strong> — SLAIR first structures degraded and clean latents, then learns deterministic ODE transport with flow matching, and finally restores high-frequency details through a wavelet-aware VAE decoder.
     </p>
 
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon blue">1</div>
+    <div class="stages-grid">
+      <!-- Stage 1 -->
+      <div class="stage-card">
+        <div class="stage-number blue">01</div>
+        <div class="stage-marker blue">Stage 1</div>
         <h4>Degradation-Aware Latent Separation</h4>
-        <p>The paper shows that original VAE latents entangle degraded and clean samples, making the transport direction ambiguous. SLAIR fine-tunes the VAE with binary and degradation-subtype classification losses, enlarging the margin between <em>z</em><sub>deg</sub> and <em>z</em><sub>gt</sub> while preserving reconstruction quality.</p>
+        <p>
+          The original VAE latents entangle degraded and clean samples, making the transport direction ambiguous.
+          SLAIR fine-tunes the VAE with binary and degradation-subtype classification losses, enlarging the margin
+          between <em>z</em><sub>deg</sub> and <em>z</em><sub>gt</sub> while preserving reconstruction quality.
+        </p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon purple">2</div>
+      <!-- Stage 2 -->
+      <div class="stage-card">
+        <div class="stage-number purple">02</div>
+        <div class="stage-marker purple">Stage 2</div>
         <h4>Deterministic Conditional Transport</h4>
-        <p>Instead of estimating degradation labels or sampling from random noise, SLAIR learns a conditional velocity field in latent space. A LightningDiT backbone solves the ODE from degraded latents to clean latents, yielding a stable degradation-agnostic restoration path.</p>
+        <p>
+          Instead of estimating degradation labels or sampling from random noise, SLAIR learns a conditional velocity
+          field in latent space. A LightningDiT backbone solves the ODE from degraded latents to clean latents,
+          yielding a stable, degradation-agnostic restoration path.
+        </p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon amber">3</div>
-        <h4>High-Frequency Details Refinement</h4>
-        <p>Latent restoration can lose fine structures during decoding. SLAIR injects pyramid VAE encoder features through fusion blocks and constrains the decoder with a DWT high-frequency loss, recovering sharp edges while suppressing reintroduced rain, moire, haze, and other artifacts.</p>
+      <!-- Stage 3 -->
+      <div class="stage-card">
+        <div class="stage-number amber">03</div>
+        <div class="stage-marker amber">Stage 3</div>
+        <h4>High-Frequency Detail Refinement</h4>
+        <p>
+          Latent restoration can lose fine structures during decoding. SLAIR injects pyramid VAE encoder features
+          through fusion blocks and constrains the decoder with a DWT high-frequency loss, recovering sharp edges
+          while suppressing re-introduced rain, moiré, haze, and other artifacts.
+        </p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Quantitative ── -->
+<section id="quantitative">
+  <div class="container-wide container">
+    <div class="section-eyebrow">Quantitative Benchmarks</div>
+    <h2>State-of-the-Art on Setting (i) &amp; Setting (ii)</h2>
+    <div class="rule"></div>
+
+    <p>
+      SLAIR is evaluated under two settings:
+      <strong style="color:var(--text)">Setting (i)</strong> — comprehensive 8-task benchmark (Rain1400, Outdoor-Rain, Raindrop, UHDSnow, SOTS, BSD68, LoL, UHDM, HDR-Eye);
+      <strong style="color:var(--text)">Setting (ii)</strong> — standard 5-task all-in-one benchmark (BSD68, GoPro, LoL, Rain100L, SOTS).
+      Best values are <strong>bold</strong>; second-best are <u>underlined</u>.
+    </p>
+
+    <!-- Setting (i) Table A -->
+    <p class="table-label mt-2"><strong>Table 1 · Setting (i)</strong> <span>— comprehensive 8-task benchmark</span></p>
+    <div class="table-wrap">
+      <table style="min-width:1780px;" id="settingITableA">
+        <thead>
+          <tr>
+            <th class="setting-band" colspan="21">Setting (i) — Rain1400 · Outdoor-Rain · Raindrop · UHDSnow · SOTS <span>(PSNR↑ / SSIM↑ / LPIPS↓ / FID↓)</span></th>
+          </tr>
+          <tr>
+            <th rowspan="2" style="text-align:left; min-width:108px;">Method</th>
+            <th colspan="4" class="task-header">Rain1400</th>
+            <th colspan="4" class="task-header">Outdoor-Rain</th>
+            <th colspan="4" class="task-header">Raindrop</th>
+            <th colspan="4" class="task-header">UHDSnow</th>
+            <th colspan="4" class="task-header">SOTS</th>
+          </tr>
+          <tr>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="method-col">AirNet</td>      <td>24.32</td><td>.764</td><td>.207</td><td>85.49</td>  <td>16.39</td><td>.600</td><td>.457</td><td>200.99</td>  <td>21.91</td><td>.832</td><td>.191</td><td>119.98</td>  <td>22.14</td><td>.780</td><td>.232</td><td>106.28</td>  <td>26.57</td><td>.925</td><td>.056</td><td>19.97</td></tr>
+          <tr><td class="method-col">PromptIR</td>    <td>25.40</td><td>.798</td><td>.176</td><td>73.90</td>  <td>17.22</td><td>.614</td><td>.445</td><td>190.44</td>  <td>22.79</td><td>.836</td><td>.174</td><td>119.66</td>  <td>23.12</td><td>.847</td><td>.177</td><td>82.21</td>   <td>28.90</td><td>.974</td><td>.016</td><td>4.26</td></tr>
+          <tr><td class="method-col">DA-CLIP</td>     <td>25.89</td><td>.816</td><td>.158</td><td>63.91</td>  <td>15.15</td><td>.544</td><td>.483</td><td>191.80</td>  <td class="best">29.74</td><td class="best">.896</td><td class="best">.052</td><td class="best">34.25</td>  <td class="best">31.43</td><td class="best">.944</td><td class="best">.042</td><td class="best">18.76</td>  <td class="second">30.94</td><td class="second">.965</td><td class="second">.016</td><td>4.67</td></tr>
+          <tr><td class="method-col">AdaIR</td>       <td>24.52</td><td>.760</td><td>.205</td><td>83.96</td>  <td>16.96</td><td>.611</td><td>.445</td><td>191.35</td>  <td>23.00</td><td>.840</td><td>.174</td><td>121.01</td>  <td>22.47</td><td>.792</td><td>.222</td><td>99.96</td>   <td>27.56</td><td>.939</td><td>.041</td><td>11.36</td></tr>
+          <tr><td class="method-col">DCPT</td>        <td>25.25</td><td>.792</td><td>.184</td><td>79.31</td>  <td>13.51</td><td>.554</td><td>.501</td><td>199.03</td>  <td>18.28</td><td>.788</td><td>.199</td><td>118.58</td>  <td>22.95</td><td>.837</td><td>.189</td><td>89.27</td>   <td>29.58</td><td>.973</td><td>.016</td><td>4.44</td></tr>
+          <tr><td class="method-col">MoCE-IR</td>     <td>24.70</td><td>.773</td><td>.203</td><td>87.27</td>  <td>16.66</td><td>.610</td><td>.449</td><td>191.79</td>  <td>22.40</td><td>.829</td><td>.178</td><td>117.44</td>  <td>22.56</td><td>.812</td><td>.217</td><td>101.85</td>  <td class="best">30.08</td><td class="best">.975</td><td class="best">.014</td><td class="best">4.22</td></tr>
+          <tr><td class="method-col">VLU-Net</td>     <td>24.55</td><td>.765</td><td>.201</td><td>84.64</td>  <td>17.02</td><td>.612</td><td>.446</td><td>190.74</td>  <td>22.88</td><td>.837</td><td>.179</td><td>115.29</td>  <td>22.38</td><td>.784</td><td>.229</td><td>103.67</td>  <td>27.68</td><td>.941</td><td>.043</td><td>12.44</td></tr>
+          <tr><td class="method-col">DiffUIR</td>     <td class="best">30.19</td><td class="best">.903</td><td class="best">.072</td><td class="best">25.52</td>  <td>14.74</td><td>.603</td><td>.431</td><td>132.02</td>  <td>23.50</td><td>.844</td><td>.170</td><td>113.43</td>  <td class="second">29.41</td><td class="second">.943</td><td class="second">.056</td><td class="second">27.59</td>  <td class="best">31.11</td><td class="best">.976</td><td class="best">.011</td><td class="second">9.53</td></tr>
+          <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td>  <td class="second">29.36</td><td class="second">.893</td><td class="second">.080</td><td class="second">29.64</td>  <td class="best">22.50</td><td class="best">.815</td><td class="best">.187</td><td class="best">55.75</td>  <td class="second">28.74</td><td class="second">.904</td><td class="second">.082</td><td class="second">45.66</td>  <td class="second">28.62</td><td class="second">.925</td><td class="second">.068</td><td class="second">30.54</td>  <td>26.02</td><td>.938</td><td>.034</td><td>8.89</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap">
+      <table style="min-width:1780px;">
+        <thead>
+          <tr>
+            <th class="setting-band" colspan="21">Setting (i) continued — BSD68 · LoL · UHDM · HDR-Eye · Average <span>(PSNR↑ / SSIM↑ / LPIPS↓ / FID↓)</span></th>
+          </tr>
+          <tr>
+            <th rowspan="2" style="text-align:left; min-width:108px;">Method</th>
+            <th colspan="4" class="task-header">BSD68</th>
+            <th colspan="4" class="task-header">LoL</th>
+            <th colspan="4" class="task-header">UHDM</th>
+            <th colspan="4" class="task-header">HDR-Eye</th>
+            <th colspan="4" class="task-header">Average</th>
+          </tr>
+          <tr>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="method-col">AirNet</td>      <td>26.17</td><td>.636</td><td>.429</td><td>74.70</td>  <td>24.01</td><td>.720</td><td>.278</td><td>97.91</td>   <td>18.22</td><td>.698</td><td>.234</td><td>54.89</td>  <td>16.04</td><td>.753</td><td>.175</td><td>62.10</td>  <td>21.75</td><td>.745</td><td>.251</td><td>91.37</td></tr>
+          <tr><td class="method-col">PromptIR</td>    <td>22.32</td><td>.445</td><td>.564</td><td>83.77</td>  <td>25.23</td><td>.771</td><td>.228</td><td>97.15</td>   <td>18.57</td><td>.703</td><td>.223</td><td>53.04</td>  <td>16.18</td><td>.740</td><td>.172</td><td>55.49</td>  <td>22.19</td><td>.748</td><td>.242</td><td>84.44</td></tr>
+          <tr><td class="method-col">DA-CLIP</td>     <td class="second">27.98</td><td class="second">.777</td><td class="second">.190</td><td>60.57</td>  <td class="second">26.57</td><td class="second">.804</td><td class="second">.210</td><td>124.59</td>  <td>18.61</td><td>.727</td><td>.222</td><td>54.06</td>  <td>16.65</td><td>.785</td><td>.162</td><td>58.48</td>  <td class="second">24.77</td><td class="second">.806</td><td class="second">.171</td><td>67.90</td></tr>
+          <tr><td class="method-col">AdaIR</td>       <td>23.04</td><td>.478</td><td>.546</td><td>83.58</td>  <td>22.14</td><td>.734</td><td>.256</td><td>102.82</td>  <td>18.76</td><td>.719</td><td>.222</td><td>52.09</td>  <td>17.34</td><td>.784</td><td>.165</td><td>56.88</td>  <td>21.75</td><td>.740</td><td>.253</td><td>89.22</td></tr>
+          <tr><td class="method-col">DCPT</td>        <td>22.38</td><td>.457</td><td>.566</td><td>82.82</td>  <td>26.02</td><td>.789</td><td>.212</td><td>100.60</td>  <td>17.81</td><td>.715</td><td>.230</td><td>54.91</td>  <td>13.96</td><td>.799</td><td>.186</td><td>64.68</td>  <td>21.08</td><td>.745</td><td>.254</td><td>88.18</td></tr>
+          <tr><td class="method-col">MoCE-IR</td>     <td>25.31</td><td>.587</td><td>.456</td><td>76.79</td>  <td>27.50</td><td>.836</td><td>.169</td><td>96.04</td>   <td>18.54</td><td>.708</td><td>.226</td><td>53.47</td>  <td>16.25</td><td>.758</td><td>.172</td><td>56.03</td>  <td>22.67</td><td>.765</td><td>.232</td><td>87.21</td></tr>
+          <tr><td class="method-col">VLU-Net</td>     <td>23.45</td><td>.495</td><td>.516</td><td>81.66</td>  <td>21.09</td><td>.820</td><td>.175</td><td>97.94</td>   <td>18.71</td><td>.719</td><td>.222</td><td>52.48</td>  <td>16.44</td><td>.750</td><td>.171</td><td>55.43</td>  <td>21.58</td><td>.747</td><td>.242</td><td>88.25</td></tr>
+          <tr><td class="method-col">DiffUIR</td>     <td>20.41</td><td>.558</td><td>.473</td><td>86.91</td>  <td>19.35</td><td>.809</td><td>.180</td><td class="best">89.85</td>  <td>18.57</td><td class="second">.737</td><td class="second">.208</td><td class="best">48.62</td>  <td class="second">17.41</td><td class="best">.815</td><td class="best">.149</td><td class="second">54.28</td>  <td>22.74</td><td class="second">.799</td><td class="second">.194</td><td class="second">65.31</td></tr>
+          <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td>  <td class="best">28.36</td><td class="best">.858</td><td class="best">.178</td><td class="best">48.78</td>  <td class="best">26.83</td><td class="best">.833</td><td class="best">.139</td><td class="second">69.76</td>  <td class="best">21.59</td><td class="best">.847</td><td class="best">.114</td><td class="second">26.45</td>  <td class="best">23.29</td><td class="second">.870</td><td class="second">.148</td><td class="best">54.36</td>  <td class="best">26.15</td><td class="best">.876</td><td class="best">.114</td><td class="best">41.09</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Setting (ii) -->
+    <p class="table-label mt-2"><strong>Table 2 · Setting (ii)</strong> <span>— standard 5-task all-in-one benchmark</span></p>
+    <div class="table-wrap">
+      <table style="min-width:1400px;">
+        <thead>
+          <tr>
+            <th class="setting-band" colspan="21">Setting (ii) — BSD68 · GoPro · LoL · Rain100L · SOTS <span>(PSNR↑ / SSIM↑ / LPIPS↓ / FID↓)</span></th>
+          </tr>
+          <tr>
+            <th rowspan="2" style="text-align:left; min-width:108px;">Method</th>
+            <th colspan="4" class="task-header">BSD68</th>
+            <th colspan="4" class="task-header">GoPro</th>
+            <th colspan="4" class="task-header">LoL</th>
+            <th colspan="4" class="task-header">Rain100L</th>
+            <th colspan="4" class="task-header">SOTS</th>
+          </tr>
+          <tr>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="method-col">AirNet</td>    <td>26.17</td><td>.636</td><td>.429</td><td>74.70</td>  <td>22.85</td><td>.766</td><td>.275</td><td>60.57</td>  <td>24.01</td><td>.720</td><td>.278</td><td>97.91</td>  <td>28.76</td><td>.881</td><td>.147</td><td>41.40</td>  <td>26.57</td><td>.925</td><td>.056</td><td>19.97</td></tr>
+          <tr><td class="method-col">PromptIR</td>  <td>22.32</td><td>.445</td><td>.564</td><td>83.77</td>  <td>22.65</td><td>.763</td><td>.276</td><td>59.29</td>  <td>25.23</td><td>.771</td><td>.228</td><td>97.15</td>  <td class="best">32.16</td><td class="second">.902</td><td class="second">.105</td><td class="second">26.64</td>  <td>28.90</td><td>.974</td><td>.016</td><td class="best">4.26</td></tr>
+          <tr><td class="method-col">AdaIR</td>     <td>23.04</td><td>.478</td><td>.546</td><td>83.58</td>  <td class="second">28.98</td><td class="second">.878</td><td class="second">.161</td><td class="second">28.23</td>  <td>22.14</td><td>.734</td><td>.256</td><td>102.82</td>  <td>28.85</td><td>.858</td><td>.177</td><td>70.13</td>  <td>27.56</td><td>.939</td><td>.041</td><td>11.36</td></tr>
+          <tr><td class="method-col">DCPT</td>      <td>22.38</td><td>.457</td><td>.566</td><td>82.82</td>  <td>22.20</td><td>.799</td><td>.242</td><td>45.09</td>  <td>26.02</td><td>.789</td><td>.212</td><td>100.60</td>  <td class="second">30.61</td><td>.899</td><td>.119</td><td>42.12</td>  <td>29.58</td><td>.973</td><td>.016</td><td class="second">4.44</td></tr>
+          <tr><td class="method-col">MoCE-IR</td>   <td>25.31</td><td>.587</td><td>.456</td><td>76.79</td>  <td class="best">30.46</td><td class="best">.907</td><td class="best">.125</td><td class="best">22.36</td>  <td>27.50</td><td>.836</td><td>.169</td><td>96.04</td>  <td>29.26</td><td>.863</td><td>.160</td><td>61.48</td>  <td class="best">30.08</td><td class="best">.975</td><td class="best">.014</td><td class="best">4.22</td></tr>
+          <tr><td class="method-col">VLU-Net</td>   <td>23.45</td><td>.495</td><td>.516</td><td>81.66</td>  <td>28.25</td><td>.860</td><td>.184</td><td>34.67</td>  <td>21.09</td><td>.820</td><td>.175</td><td>97.94</td>  <td class="best">31.70</td><td class="best">.897</td><td class="second">.115</td><td class="best">34.55</td>  <td>27.68</td><td>.941</td><td>.043</td><td>12.44</td></tr>
+          <tr><td class="method-col">DiffUIR</td>   <td>20.41</td><td>.558</td><td>.473</td><td>86.91</td>  <td>27.62</td><td>.844</td><td>.201</td><td>40.99</td>  <td>19.35</td><td>.809</td><td>.180</td><td>89.85</td>  <td>28.26</td><td>.898</td><td>.165</td><td>79.52</td>  <td class="second">31.11</td><td class="second">.976</td><td class="best">.011</td><td>9.53</td></tr>
+          <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td>  <td class="best">29.21</td><td class="best">.846</td><td class="best">.139</td><td class="best">39.99</td>  <td>25.91</td><td>.796</td><td>.153</td><td>32.87</td>  <td class="best">29.13</td><td class="best">.883</td><td class="best">.083</td><td class="best">45.75</td>  <td>31.01</td><td class="second">.943</td><td class="best">.060</td><td class="second">28.89</td>  <td>26.67</td><td>.942</td><td>.033</td><td>7.76</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Setting (ii) Average -->
+    <div class="table-wrap" style="margin-bottom:0;">
+      <table style="min-width:580px;">
+        <thead>
+          <tr>
+            <th class="setting-band" colspan="5">Setting (ii) — Average <span>(PSNR↑ / SSIM↑ / LPIPS↓ / FID↓)</span></th>
+          </tr>
+          <tr>
+            <th style="text-align:left; min-width:108px;">Method</th>
+            <th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="method-col">AirNet</td>    <td>25.67</td><td>.786</td><td>.237</td><td>58.91</td></tr>
+          <tr><td class="method-col">PromptIR</td>  <td>26.25</td><td>.771</td><td>.238</td><td>54.22</td></tr>
+          <tr><td class="method-col">AdaIR</td>     <td>26.11</td><td>.777</td><td>.236</td><td>59.22</td></tr>
+          <tr><td class="method-col">DCPT</td>      <td>26.16</td><td>.783</td><td>.231</td><td>55.01</td></tr>
+          <tr><td class="method-col">MoCE-IR</td>   <td class="second">28.52</td><td class="second">.834</td><td class="second">.185</td><td class="second">52.18</td></tr>
+          <tr><td class="method-col">VLU-Net</td>   <td>26.43</td><td>.803</td><td>.207</td><td class="second">52.25</td></tr>
+          <tr><td class="method-col">DiffUIR</td>   <td>25.35</td><td>.817</td><td>.206</td><td>61.36</td></tr>
+          <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td>  <td class="best">28.39</td><td class="best">.882</td><td class="best">.094</td><td class="best">31.05</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
 
 <!-- ── Qualitative Results ── -->
-<section id="results" style="background:var(--bg);">
+<section id="results">
   <div class="container">
-    <div id="quantitative" class="benchmark-block">
-      <div class="section-label">Quantitative Benchmarks</div>
-      <h2>State-of-the-Art on Setting (i) &amp; Setting (ii)</h2>
-      <div class="section-divider"></div>
-      <p>SLAIR is evaluated under two paper settings: <strong style="color:var(--text)">Setting (i)</strong> is the comprehensive benchmark over Rain1400, Outdoor-Rain, Raindrop, UHDSnow, SOTS, BSD68, LoL, UHDM, and HDR-Eye; <strong style="color:var(--text)">Setting (ii)</strong> is the standard 5-task all-in-one benchmark over BSD68, GoPro, LoL, Rain100L, and SOTS.</p>
+    <div class="section-eyebrow">Qualitative Results</div>
+    <h2>Setting (i) Visual Results</h2>
+    <div class="rule"></div>
+    <p>Select a degradation task from the tabs below, then drag the comparison slider to reveal the restoration quality. Scroll the method strip to compare all baselines side by side.</p>
 
-      <p class="table-title"><strong style="color:var(--text)">Unified benchmark table</strong> - Setting (i) and Setting (ii) are combined into one horizontally scrollable table. Best values are <strong>bold</strong>; second-best values are <u>underlined</u>.</p>
-      <div class="table-wrap">
-        <table class="combined-table" id="combinedScoreTable"></table>
-      </div>
-
-      <div id="legacyTables" hidden>
-      <p class="table-title"><strong style="color:var(--text)">Table 1: Setting (i), comprehensive benchmark</strong> - values are PSNR↑ / SSIM↑ / LPIPS↓ / FID↓ from the paper.</p>
-      <p class="table-subtitle">Rain1400, Outdoor-Rain, Raindrop, UHDSnow, SOTS</p>
-      <div class="table-wrap">
-        <table style="min-width:1780px;">
-          <thead>
-            <tr><th rowspan="2" style="text-align:left; min-width:120px;">Method</th><th colspan="4" class="task-header">Rain1400</th><th colspan="4" class="task-header">Outdoor-Rain</th><th colspan="4" class="task-header">Raindrop</th><th colspan="4" class="task-header">UHDSnow</th><th colspan="4" class="task-header">SOTS</th></tr>
-            <tr><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th></tr>
-          </thead>
-          <tbody>
-            <tr><td class="method-col">AirNet</td><td>24.32</td><td>.764</td><td>.207</td><td>85.49</td><td>16.39</td><td>.600</td><td>.457</td><td>200.99</td><td>21.91</td><td>.832</td><td>.191</td><td>119.98</td><td>22.14</td><td>.780</td><td>.232</td><td>106.28</td><td>26.57</td><td>.925</td><td>.056</td><td>19.97</td></tr>
-            <tr><td class="method-col">PromptIR</td><td>25.40</td><td>.798</td><td>.176</td><td>73.90</td><td>17.22</td><td>.614</td><td>.445</td><td>190.44</td><td>22.79</td><td>.836</td><td>.174</td><td>119.66</td><td>23.12</td><td>.847</td><td>.177</td><td>82.21</td><td>28.90</td><td>.974</td><td>.016</td><td>4.26</td></tr>
-            <tr><td class="method-col">DA-CLIP</td><td>25.89</td><td>.816</td><td>.158</td><td>63.91</td><td>15.15</td><td>.544</td><td>.483</td><td>191.80</td><td>29.74</td><td>.896</td><td>.052</td><td>34.25</td><td>31.43</td><td>.944</td><td>.042</td><td>18.76</td><td>30.94</td><td>.965</td><td>.016</td><td>4.67</td></tr>
-            <tr><td class="method-col">AdaIR</td><td>24.52</td><td>.760</td><td>.205</td><td>83.96</td><td>16.96</td><td>.611</td><td>.445</td><td>191.35</td><td>23.00</td><td>.840</td><td>.174</td><td>121.01</td><td>22.47</td><td>.792</td><td>.222</td><td>99.96</td><td>27.56</td><td>.939</td><td>.041</td><td>11.36</td></tr>
-            <tr><td class="method-col">DCPT</td><td>25.25</td><td>.792</td><td>.184</td><td>79.31</td><td>13.51</td><td>.554</td><td>.501</td><td>199.03</td><td>18.28</td><td>.788</td><td>.199</td><td>118.58</td><td>22.95</td><td>.837</td><td>.189</td><td>89.27</td><td>29.58</td><td>.973</td><td>.016</td><td>4.44</td></tr>
-            <tr><td class="method-col">MoCE-IR</td><td>24.70</td><td>.773</td><td>.203</td><td>87.27</td><td>16.66</td><td>.610</td><td>.449</td><td>191.79</td><td>22.40</td><td>.829</td><td>.178</td><td>117.44</td><td>22.56</td><td>.812</td><td>.217</td><td>101.85</td><td>30.08</td><td>.975</td><td>.014</td><td>4.22</td></tr>
-            <tr><td class="method-col">VLU-Net</td><td>24.55</td><td>.765</td><td>.201</td><td>84.64</td><td>17.02</td><td>.612</td><td>.446</td><td>190.74</td><td>22.88</td><td>.837</td><td>.179</td><td>115.29</td><td>22.38</td><td>.784</td><td>.229</td><td>103.67</td><td>27.68</td><td>.941</td><td>.043</td><td>12.44</td></tr>
-            <tr><td class="method-col">DiffUIR</td><td>30.19</td><td>.903</td><td>.072</td><td>25.52</td><td>14.74</td><td>.603</td><td>.431</td><td>132.02</td><td>23.50</td><td>.844</td><td>.170</td><td>113.43</td><td>29.41</td><td>.943</td><td>.056</td><td>27.59</td><td>31.11</td><td>.976</td><td>.011</td><td>9.53</td></tr>
-            <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td><td>29.36</td><td>.893</td><td>.080</td><td>29.64</td><td>22.50</td><td>.815</td><td>.187</td><td>55.75</td><td>28.74</td><td>.904</td><td>.082</td><td>45.66</td><td>28.62</td><td>.925</td><td>.068</td><td>30.54</td><td>26.02</td><td>.938</td><td>.034</td><td>8.89</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="table-subtitle">BSD68, LoL, UHDM, HDR-Eye, Average</p>
-      <div class="table-wrap">
-        <table style="min-width:1780px;">
-          <thead>
-            <tr><th rowspan="2" style="text-align:left; min-width:120px;">Method</th><th colspan="4" class="task-header">BSD68</th><th colspan="4" class="task-header">LoL</th><th colspan="4" class="task-header">UHDM</th><th colspan="4" class="task-header">HDR-Eye</th><th colspan="4" class="task-header">Average</th></tr>
-            <tr><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th></tr>
-          </thead>
-          <tbody>
-            <tr><td class="method-col">AirNet</td><td>26.17</td><td>.636</td><td>.429</td><td>74.70</td><td>24.01</td><td>.720</td><td>.278</td><td>97.91</td><td>18.22</td><td>.698</td><td>.234</td><td>54.89</td><td>16.04</td><td>.753</td><td>.175</td><td>62.10</td><td>21.75</td><td>.745</td><td>.251</td><td>91.37</td></tr>
-            <tr><td class="method-col">PromptIR</td><td>22.32</td><td>.445</td><td>.564</td><td>83.77</td><td>25.23</td><td>.771</td><td>.228</td><td>97.15</td><td>18.57</td><td>.703</td><td>.223</td><td>53.04</td><td>16.18</td><td>.740</td><td>.172</td><td>55.49</td><td>22.19</td><td>.748</td><td>.242</td><td>84.44</td></tr>
-            <tr><td class="method-col">DA-CLIP</td><td>27.98</td><td>.777</td><td>.190</td><td>60.57</td><td>26.57</td><td>.804</td><td>.210</td><td>124.59</td><td>18.61</td><td>.727</td><td>.222</td><td>54.06</td><td>16.65</td><td>.785</td><td>.162</td><td>58.48</td><td>24.77</td><td>.806</td><td>.171</td><td>67.90</td></tr>
-            <tr><td class="method-col">AdaIR</td><td>23.04</td><td>.478</td><td>.546</td><td>83.58</td><td>22.14</td><td>.734</td><td>.256</td><td>102.82</td><td>18.76</td><td>.719</td><td>.222</td><td>52.09</td><td>17.34</td><td>.784</td><td>.165</td><td>56.88</td><td>21.75</td><td>.740</td><td>.253</td><td>89.22</td></tr>
-            <tr><td class="method-col">DCPT</td><td>22.38</td><td>.457</td><td>.566</td><td>82.82</td><td>26.02</td><td>.789</td><td>.212</td><td>100.60</td><td>17.81</td><td>.715</td><td>.230</td><td>54.91</td><td>13.96</td><td>.799</td><td>.186</td><td>64.68</td><td>21.08</td><td>.745</td><td>.254</td><td>88.18</td></tr>
-            <tr><td class="method-col">MoCE-IR</td><td>25.31</td><td>.587</td><td>.456</td><td>76.79</td><td>27.50</td><td>.836</td><td>.169</td><td>96.04</td><td>18.54</td><td>.708</td><td>.226</td><td>53.47</td><td>16.25</td><td>.758</td><td>.172</td><td>56.03</td><td>22.67</td><td>.765</td><td>.232</td><td>87.21</td></tr>
-            <tr><td class="method-col">VLU-Net</td><td>23.45</td><td>.495</td><td>.516</td><td>81.66</td><td>21.09</td><td>.820</td><td>.175</td><td>97.94</td><td>18.71</td><td>.719</td><td>.222</td><td>52.48</td><td>16.44</td><td>.750</td><td>.171</td><td>55.43</td><td>21.58</td><td>.747</td><td>.242</td><td>88.25</td></tr>
-            <tr><td class="method-col">DiffUIR</td><td>20.41</td><td>.558</td><td>.473</td><td>86.91</td><td>19.35</td><td>.809</td><td>.180</td><td>89.85</td><td>18.57</td><td>.737</td><td>.208</td><td>48.62</td><td>17.41</td><td>.815</td><td>.149</td><td>54.28</td><td>22.74</td><td>.799</td><td>.194</td><td>65.31</td></tr>
-            <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td><td>28.36</td><td>.858</td><td>.178</td><td>48.78</td><td>26.83</td><td>.833</td><td>.139</td><td>69.76</td><td>21.59</td><td>.847</td><td>.114</td><td>26.45</td><td>23.29</td><td>.870</td><td>.148</td><td>54.36</td><td>26.15</td><td>.876</td><td>.114</td><td>41.09</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p class="table-title"><strong style="color:var(--text)">Table 2: Setting (ii), standard 5-task benchmark</strong> - values are PSNR↑ / SSIM↑ / LPIPS↓ / FID↓ from the paper.</p>
-      <p class="table-subtitle">BSD68, GoPro, LoL</p>
-      <div class="table-wrap">
-        <table style="min-width:1120px;">
-          <thead>
-            <tr><th rowspan="2" style="text-align:left; min-width:120px;">Method</th><th colspan="4" class="task-header">BSD68</th><th colspan="4" class="task-header">GoPro</th><th colspan="4" class="task-header">LoL</th></tr>
-            <tr><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th></tr>
-          </thead>
-          <tbody>
-            <tr><td class="method-col">AirNet</td><td>26.17</td><td>.636</td><td>.429</td><td>74.70</td><td>22.85</td><td>.766</td><td>.275</td><td>60.57</td><td>24.01</td><td>.720</td><td>.278</td><td>97.91</td></tr>
-            <tr><td class="method-col">PromptIR</td><td>22.32</td><td>.445</td><td>.564</td><td>83.77</td><td>22.65</td><td>.763</td><td>.276</td><td>59.29</td><td>25.23</td><td>.771</td><td>.228</td><td>97.15</td></tr>
-            <tr><td class="method-col">AdaIR</td><td>23.04</td><td>.478</td><td>.546</td><td>83.58</td><td>28.98</td><td>.878</td><td>.161</td><td>28.23</td><td>22.14</td><td>.734</td><td>.256</td><td>102.82</td></tr>
-            <tr><td class="method-col">DCPT</td><td>22.38</td><td>.457</td><td>.566</td><td>82.82</td><td>22.20</td><td>.799</td><td>.242</td><td>45.09</td><td>26.02</td><td>.789</td><td>.212</td><td>100.60</td></tr>
-            <tr><td class="method-col">MoCE-IR</td><td>25.31</td><td>.587</td><td>.456</td><td>76.79</td><td>30.46</td><td>.907</td><td>.125</td><td>22.36</td><td>27.50</td><td>.836</td><td>.169</td><td>96.04</td></tr>
-            <tr><td class="method-col">VLU-Net</td><td>23.45</td><td>.495</td><td>.516</td><td>81.66</td><td>28.25</td><td>.860</td><td>.184</td><td>34.67</td><td>21.09</td><td>.820</td><td>.175</td><td>97.94</td></tr>
-            <tr><td class="method-col">DiffUIR</td><td>20.41</td><td>.558</td><td>.473</td><td>86.91</td><td>27.62</td><td>.844</td><td>.201</td><td>40.99</td><td>19.35</td><td>.809</td><td>.180</td><td>89.85</td></tr>
-            <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td><td>29.21</td><td>.846</td><td>.139</td><td>39.99</td><td>25.91</td><td>.796</td><td>.153</td><td>32.87</td><td>29.13</td><td>.883</td><td>.083</td><td>45.75</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="table-subtitle">Rain100L, SOTS, Average</p>
-      <div class="table-wrap">
-        <table style="min-width:1120px;">
-          <thead>
-            <tr><th rowspan="2" style="text-align:left; min-width:120px;">Method</th><th colspan="4" class="task-header">Rain100L</th><th colspan="4" class="task-header">SOTS</th><th colspan="4" class="task-header">Average</th></tr>
-            <tr><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th><th>PSNR↑</th><th>SSIM↑</th><th>LPIPS↓</th><th>FID↓</th></tr>
-          </thead>
-          <tbody>
-            <tr><td class="method-col">AirNet</td><td>28.76</td><td>.881</td><td>.147</td><td>41.40</td><td>26.57</td><td>.925</td><td>.056</td><td>19.97</td><td>25.67</td><td>.786</td><td>.237</td><td>58.91</td></tr>
-            <tr><td class="method-col">PromptIR</td><td>32.16</td><td>.902</td><td>.105</td><td>26.64</td><td>28.90</td><td>.974</td><td>.016</td><td>4.26</td><td>26.25</td><td>.771</td><td>.238</td><td>54.22</td></tr>
-            <tr><td class="method-col">AdaIR</td><td>28.85</td><td>.858</td><td>.177</td><td>70.13</td><td>27.56</td><td>.939</td><td>.041</td><td>11.36</td><td>26.11</td><td>.777</td><td>.236</td><td>59.22</td></tr>
-            <tr><td class="method-col">DCPT</td><td>30.61</td><td>.899</td><td>.119</td><td>42.12</td><td>29.58</td><td>.973</td><td>.016</td><td>4.44</td><td>26.16</td><td>.783</td><td>.231</td><td>55.01</td></tr>
-            <tr><td class="method-col">MoCE-IR</td><td>29.26</td><td>.863</td><td>.160</td><td>61.48</td><td>30.08</td><td>.975</td><td>.014</td><td>4.22</td><td>28.52</td><td>.834</td><td>.185</td><td>52.18</td></tr>
-            <tr><td class="method-col">VLU-Net</td><td>31.70</td><td>.897</td><td>.115</td><td>34.55</td><td>27.68</td><td>.941</td><td>.043</td><td>12.44</td><td>26.43</td><td>.803</td><td>.207</td><td>52.25</td></tr>
-            <tr><td class="method-col">DiffUIR</td><td>28.26</td><td>.898</td><td>.165</td><td>79.52</td><td>31.11</td><td>.976</td><td>.011</td><td>9.53</td><td>25.35</td><td>.817</td><td>.206</td><td>61.36</td></tr>
-            <tr class="ours-row"><td class="method-col">SLAIR (Ours)</td><td>31.01</td><td>.943</td><td>.060</td><td>28.89</td><td>26.67</td><td>.942</td><td>.033</td><td>7.76</td><td>28.39</td><td>.882</td><td>.094</td><td>31.05</td></tr>
-          </tbody>
-        </table>
-      </div>
-      </div>
-    </div>
-    <div class="visual-results">
-      <div class="visual-copy">
-        <div class="section-label">Qualitative Results</div>
-        <h2>Setting (i) Visual Results</h2>
-        <div class="section-divider"></div>
-        <p>Use the tabs to switch among Setting (i) test sets. The full method strip includes degraded input, competing all-in-one methods, SLAIR, and ground truth from the local image folder.</p>
-      </div>
-
-      <!-- Task tabs -->
-      <div class="task-tabs" id="taskTabs">
-        <button class="tab-btn active" data-task="Rain1400" onclick="switchTask(this)">Rain1400</button>
-        <button class="tab-btn" data-task="Outdoor-Rain" onclick="switchTask(this)">Outdoor-Rain</button>
-        <button class="tab-btn" data-task="Raindrop" onclick="switchTask(this)">Raindrop</button>
-        <button class="tab-btn" data-task="UHDSnow" onclick="switchTask(this)">UHDSnow</button>
-        <button class="tab-btn" data-task="SOTS" onclick="switchTask(this)">SOTS (Haze)</button>
-        <button class="tab-btn" data-task="CBSD68" onclick="switchTask(this)">BSD68 (Noise)</button>
-        <button class="tab-btn" data-task="LoL" onclick="switchTask(this)">LoL (Low-light)</button>
-        <button class="tab-btn" data-task="UHDM" onclick="switchTask(this)">UHDM (Moire)</button>
-        <button class="tab-btn" data-task="HDR-Eye" onclick="switchTask(this)">HDR-Eye</button>
-      </div>
-      <!-- Slider mode toggle: degraded vs ours, or ours vs gt -->
-    <div class="three-toggle">
-      <button class="three-btn active" id="modeLeft" onclick="setSliderMode('deg-ours')">Degraded ↔ Ours</button>
-      <button class="three-btn" id="modeRight" onclick="setSliderMode('ours-gt')">Ours ↔ GT</button>
+    <!-- Task tabs -->
+    <div class="task-tabs" id="taskTabs">
+      <button class="tab-btn active" data-task="Rain1400"     onclick="switchTask(this)">Rain1400</button>
+      <button class="tab-btn"        data-task="Outdoor-Rain" onclick="switchTask(this)">Outdoor-Rain</button>
+      <button class="tab-btn"        data-task="Raindrop"     onclick="switchTask(this)">Raindrop</button>
+      <button class="tab-btn"        data-task="UHDSnow"      onclick="switchTask(this)">UHDSnow</button>
+      <button class="tab-btn"        data-task="SOTS"         onclick="switchTask(this)">SOTS (Haze)</button>
+      <button class="tab-btn"        data-task="CBSD68"       onclick="switchTask(this)">BSD68 (Noise)</button>
+      <button class="tab-btn"        data-task="LoL"          onclick="switchTask(this)">LoL (Low-light)</button>
+      <button class="tab-btn"        data-task="UHDM"         onclick="switchTask(this)">UHDM (Moiré)</button>
+      <button class="tab-btn"        data-task="HDR-Eye"      onclick="switchTask(this)">HDR-Eye</button>
     </div>
 
-    <!-- Image comparison slider -->
+    <!-- Mode toggle -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeLeft"  onclick="setSliderMode('deg-ours')">Degraded ↔ Ours</button>
+      <button class="mode-btn"        id="modeRight" onclick="setSliderMode('ours-gt')">Ours ↔ GT</button>
+    </div>
+
+    <!-- Comparison slider -->
     <div class="slider-wrap" id="sliderWrap">
-      <!-- Base (right image, full width) -->
-      <img id="sliderBaseImg" class="slider-base-img" src="" alt="Right image" draggable="false">
-      <!-- Overlay (left image, clipped) -->
+      <img id="sliderBaseImg"    class="slider-base-img"    src="" alt="Right image"  draggable="false">
       <div class="slider-overlay-container" id="sliderOverlayContainer">
         <img id="sliderOverlayImg" class="slider-overlay-img" src="" alt="Left image" draggable="false">
       </div>
-      <!-- Divider line & handle -->
       <div class="slider-divider" id="sliderDivider"></div>
-      <div class="slider-handle" id="sliderHandle">
+      <div class="slider-handle"  id="sliderHandle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <polyline points="15,18 9,12 15,6"/>
           <polyline points="9,18 15,12 9,6"/>
         </svg>
       </div>
-      <!-- Labels -->
-      <span class="slider-label-left" id="labelLeft">Degraded</span>
-      <span class="slider-label-right" id="labelRight">Ours</span>
+      <span class="slider-label slider-label-left"  id="labelLeft">Degraded</span>
+      <span class="slider-label slider-label-right" id="labelRight">Ours</span>
     </div>
     <p class="slider-hint">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
-      Drag the divider left or right to compare
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8l4 4-4 4M6 8l-4 4 4 4M14 4l-4 16"/></svg>
+      Move the cursor over the image to slide — no click needed
     </p>
 
-    <div class="method-gallery mt-2" id="methodGallery"></div>
-    <p class="gallery-note">Scroll horizontally to compare AirNet, PromptIR, DA-CLIP, AdaIR, DCPT, MoCE-IR, VLU-Net, SLAIR, and GT on the selected task.</p>
+    <!-- Method gallery -->
+    <div class="gallery-scroll-outer">
+      <div class="method-gallery" id="methodGallery"></div>
     </div>
+    <p class="gallery-hint">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      Scroll to compare: Degraded · AirNet · PromptIR · DA-CLIP · AdaIR · DCPT · MoCE-IR · VLU-Net · DiffUIR · <strong style="color:var(--accent)">SLAIR (Ours)</strong> · GT
+    </p>
   </div>
 </section>
 
 <!-- ── BibTeX ── -->
-<section id="bibtex" style="background:var(--bg2);">
-  <div class="container" style="max-width:740px;">
-    <div class="section-label">Citation</div>
+<section id="bibtex">
+  <div class="container" style="max-width:720px;">
+    <div class="section-eyebrow">Citation</div>
     <h2>BibTeX</h2>
-    <div class="section-divider"></div>
+    <div class="rule"></div>
     <div class="bib-block" id="bibBlock">
       <button class="copy-btn" onclick="copyBib()">Copy</button>
-      <span class="brace">@inproceedings{</span><span class="val">liang2026slair</span><span class="brace">,</span><br>
-      &nbsp;&nbsp;<span class="key">title</span>     = <span class="val">{SLAIR: Structured Latent Flow Matching for All-in-One Image Restoration}</span>,<br>
-      &nbsp;&nbsp;<span class="key">author</span>    = <span class="val">{Liang, Shuyi and Yang, Yixin and Lou, Hanyue and Cui, Yuning and Shi, Boxin}</span>,<br>
-      &nbsp;&nbsp;<span class="key">booktitle</span> = <span class="val">{Proceedings of the European Conference on Computer Vision}</span>,<br>
-      &nbsp;&nbsp;<span class="key">year</span>      = <span class="val">{2026}</span><br>
-      <span class="brace">}</span>
+<span class="brace">@inproceedings{</span><span class="val">liang2026slair</span><span class="brace">,</span>
+&nbsp;&nbsp;<span class="key">title</span>     = <span class="val">{SLAIR: Structured Latent Flow Matching for All-in-One Image Restoration}</span>,
+&nbsp;&nbsp;<span class="key">author</span>    = <span class="val">{Liang, Shuyi and Yang, Yixin and Lou, Hanyue and Cui, Yuning and Shi, Boxin}</span>,
+&nbsp;&nbsp;<span class="key">booktitle</span> = <span class="val">{Proceedings of the European Conference on Computer Vision}</span>,
+&nbsp;&nbsp;<span class="key">year</span>      = <span class="val">{2026}</span>
+<span class="brace">}</span>
     </div>
   </div>
 </section>
 
 <!-- ── Footer ── -->
 <footer>
-  <p>SLAIR · ECCV 2026 &nbsp;|&nbsp; <a href="https://camera.pku.edu.cn" target="_blank">Camera Intelligence Lab, Peking University</a></p>
-  <p style="margin-top:0.3rem;">Website template inspired by <a href="https://petal-pku.pages.dev" target="_blank">PETAL</a>.</p>
+  <p>SLAIR · ECCV 2026 &nbsp;·&nbsp; <a href="https://camera.pku.edu.cn" target="_blank">Camera Intelligence Lab, Peking University</a></p>
+  <p style="margin-top:0.35rem;">Website template inspired by <a href="https://petal-pku.pages.dev" target="_blank">PETAL</a>.</p>
 </footer>
 
+<!-- ── Scripts ── -->
 <script>
-// ── Image assets ──────────────────────────────────────────────────────────────
 const BASE = 'image/';
 const tasks = {
   'Rain1400':     { label: 'Deraining (Rain1400)' },
@@ -859,89 +1074,51 @@ const tasks = {
   'HDR-Eye':      { label: 'HDR Reconstruction (HDR-Eye)' },
 };
 
-// ── Slider state ──────────────────────────────────────────────────────────────
 let currentTask = 'Rain1400';
-let sliderMode  = 'deg-ours'; // 'deg-ours' | 'ours-gt'
-let dragging    = false;
+let sliderMode  = 'deg-ours';
 
-const sliderWrap      = document.getElementById('sliderWrap');
-const sliderBaseImg   = document.getElementById('sliderBaseImg');
-const sliderOverlayImg= document.getElementById('sliderOverlayImg');
-const sliderOverlayCt = document.getElementById('sliderOverlayContainer');
-const sliderDivider   = document.getElementById('sliderDivider');
-const sliderHandle    = document.getElementById('sliderHandle');
-const labelLeft       = document.getElementById('labelLeft');
-const labelRight      = document.getElementById('labelRight');
-const methodGallery   = document.getElementById('methodGallery');
+const sliderWrap        = document.getElementById('sliderWrap');
+const sliderBaseImg     = document.getElementById('sliderBaseImg');
+const sliderOverlayImg  = document.getElementById('sliderOverlayImg');
+const sliderOverlayCt   = document.getElementById('sliderOverlayContainer');
+const sliderDivider     = document.getElementById('sliderDivider');
+const sliderHandle      = document.getElementById('sliderHandle');
+const labelLeft         = document.getElementById('labelLeft');
+const labelRight        = document.getElementById('labelRight');
+const methodGallery     = document.getElementById('methodGallery');
 
 const galleryMethods = [
-  { label: 'Degraded', file: 'input_stitched', tone: '#ef4444' },
-  { label: 'AirNet', file: 'AirNet_stitched' },
-  { label: 'PromptIR', file: 'PromptIR_stitched' },
-  { label: 'DA-CLIP', file: 'DA-CLIP_stitched' },
-  { label: 'AdaIR', file: 'AdaIR_stitched' },
-  { label: 'DCPT', file: 'DCPT_stitched' },
-  { label: 'MoCE-IR', file: 'MoCE-IR_stitched' },
-  { label: 'VLU-Net', file: 'VLU-Net_stitched' },
-  { label: 'SLAIR', file: 'Ours_stitched', ours: true },
-  { label: 'GT', file: 'gt_stitched', tone: '#16a34a' },
+  { label: 'Degraded',  file: 'input_stitched',  cls: '',     tone: '#ef4444' },
+  { label: 'AirNet',   file: 'AirNet_stitched',  cls: '' },
+  { label: 'PromptIR', file: 'PromptIR_stitched',cls: '' },
+  { label: 'DA-CLIP',  file: 'DA-CLIP_stitched', cls: '' },
+  { label: 'AdaIR',    file: 'AdaIR_stitched',   cls: '' },
+  { label: 'DCPT',     file: 'DCPT_stitched',    cls: '' },
+  { label: 'MoCE-IR',  file: 'MoCE-IR_stitched', cls: '' },
+  { label: 'VLU-Net',  file: 'VLU-Net_stitched', cls: '' },
+  { label: 'DiffUIR',  file: 'DiffUIR_stitched', cls: '' },
+  { label: 'SLAIR',    file: 'Ours_stitched',    cls: 'ours' },
+  { label: 'GT',       file: 'gt_stitched',      cls: 'gt',   tone: '#16a34a' },
 ];
 
-function imgUrl(task, type) {
-  // type: 'input_stitched' | 'Ours_stitched' | 'gt_stitched'
-  return `${BASE}${task}/${type}.png`;
-}
+function imgUrl(task, type) { return `${BASE}${task}/${type}.png`; }
 
-function loadTask(task) {
-  currentTask = task;
-  renderMethodGallery(task);
-  applySliderMode();
-}
-
-function renderMethodGallery(task) {
-  methodGallery.innerHTML = galleryMethods.map(method => {
-    const cls = method.ours ? 'gallery-cell ours' : 'gallery-cell';
-    const style = method.tone ? ` style="color:${method.tone};"` : '';
-    return `
-      <div class="${cls}">
-        <img src="${imgUrl(task, method.file)}" alt="${tasks[task].label} - ${method.label}" loading="lazy">
-        <div class="gallery-cell-label"${style}><span>${method.label}</span></div>
-      </div>
-    `;
+function renderGallery(task) {
+  methodGallery.innerHTML = galleryMethods.map(m => {
+    const style = m.tone ? ` style="color:${m.tone};"` : '';
+    return `<div class="gallery-cell ${m.cls}">
+      <img src="${imgUrl(task, m.file)}" alt="${m.label}" loading="lazy">
+      <div class="gallery-cell-label"${style}>${m.label}</div>
+    </div>`;
   }).join('');
 }
 
-function applySliderMode() {
-  const task = currentTask;
-  const deg  = imgUrl(task, 'input_stitched');
-  const ours = imgUrl(task, 'Ours_stitched');
-  const gt   = imgUrl(task, 'gt_stitched');
-
-  if (sliderMode === 'deg-ours') {
-    sliderBaseImg.src    = ours;  // right
-    sliderOverlayImg.src = deg;   // left (clipped)
-    labelLeft.textContent  = 'Degraded';
-    labelRight.textContent = 'Ours';
-    labelLeft.style.color  = '#f87171';
-    labelRight.style.color = '#60a5fa';
-  } else {
-    sliderBaseImg.src    = gt;    // right
-    sliderOverlayImg.src = ours;  // left
-    labelLeft.textContent  = 'Ours';
-    labelRight.textContent = 'GT';
-    labelLeft.style.color  = '#60a5fa';
-    labelRight.style.color = '#4ade80';
-  }
-  setSliderPos(0.5);
-}
-
 function setSliderPos(fraction) {
-  const pct = `${(fraction * 100).toFixed(2)}%`;
-  sliderOverlayCt.style.width = pct;
-  sliderDivider.style.left    = pct;
-  sliderHandle.style.left     = pct;
-  // overlay image needs to be full width always
-  const wrapW = sliderWrap.getBoundingClientRect().width || 900;
+  const pct  = `${(fraction * 100).toFixed(2)}%`;
+  sliderOverlayCt.style.width  = pct;
+  sliderDivider.style.left     = pct;
+  sliderHandle.style.left      = pct;
+  const wrapW = sliderWrap.getBoundingClientRect().width || 960;
   sliderOverlayImg.style.width = wrapW + 'px';
 }
 
@@ -951,17 +1128,52 @@ function getPosFraction(e) {
   return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
 }
 
-sliderWrap.addEventListener('mousedown',  e => { dragging = true; setSliderPos(getPosFraction(e)); });
-sliderWrap.addEventListener('touchstart', e => { dragging = true; setSliderPos(getPosFraction(e)); }, { passive: true });
-window.addEventListener('mousemove', e => { if (dragging) { setSliderPos(getPosFraction(e)); } });
-window.addEventListener('touchmove', e => { if (dragging) { setSliderPos(getPosFraction(e)); } }, { passive: true });
-window.addEventListener('mouseup',   () => { dragging = false; });
-window.addEventListener('touchend',  () => { dragging = false; });
+function applySliderMode() {
+  const deg  = imgUrl(currentTask, 'input_stitched');
+  const ours = imgUrl(currentTask, 'Ours_stitched');
+  const gt   = imgUrl(currentTask, 'gt_stitched');
+  if (sliderMode === 'deg-ours') {
+    sliderBaseImg.src    = ours;
+    sliderOverlayImg.src = deg;
+    labelLeft.textContent  = 'Degraded';
+    labelRight.textContent = 'Ours';
+    labelLeft.style.color  = '#fca5a5';
+    labelRight.style.color = '#93c5fd';
+  } else {
+    sliderBaseImg.src    = gt;
+    sliderOverlayImg.src = ours;
+    labelLeft.textContent  = 'Ours';
+    labelRight.textContent = 'GT';
+    labelLeft.style.color  = '#93c5fd';
+    labelRight.style.color = '#86efac';
+  }
+  setSliderPos(0.5);
+}
 
-// keep overlay width synced on resize
-window.addEventListener('resize', () => setSliderPos(parseFloat(sliderOverlayCt.style.width)/100));
+function loadTask(task) {
+  currentTask = task;
+  renderGallery(task);
+  applySliderMode();
+}
 
-// ── Tab switching ─────────────────────────────────────────────────────────────
+/* ── Hover-to-slide (mousemove, no click needed) ── */
+sliderWrap.addEventListener('mousemove', e => {
+  setSliderPos(getPosFraction(e));
+});
+
+/* ── Touch drag for mobile ── */
+sliderWrap.addEventListener('touchmove', e => {
+  e.preventDefault();
+  setSliderPos(getPosFraction(e));
+}, { passive: false });
+
+/* Keep overlay width synced on resize */
+window.addEventListener('resize', () => {
+  const pct = parseFloat(sliderOverlayCt.style.width) / 100 || 0.5;
+  setSliderPos(pct);
+});
+
+/* Tab switching */
 function switchTask(btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -975,9 +1187,13 @@ function setSliderMode(mode) {
   applySliderMode();
 }
 
-// ── BibTeX copy ───────────────────────────────────────────────────────────────
 function copyBib() {
-  const bib = `@inproceedings{liang2026slair,\n  title     = {SLAIR: Structured Latent Flow Matching for All-in-One Image Restoration},\n  author    = {Liang, Shuyi and Yang, Yixin and Lou, Hanyue and Cui, Yuning and Shi, Boxin},\n  booktitle = {Proceedings of the European Conference on Computer Vision},\n  year      = {2026}\n}`;
+  const bib = `@inproceedings{liang2026slair,
+  title     = {SLAIR: Structured Latent Flow Matching for All-in-One Image Restoration},
+  author    = {Liang, Shuyi and Yang, Yixin and Lou, Hanyue and Cui, Yuning and Shi, Boxin},
+  booktitle = {Proceedings of the European Conference on Computer Vision},
+  year      = {2026}
+}`;
   navigator.clipboard.writeText(bib).then(() => {
     const btn = document.querySelector('.copy-btn');
     btn.textContent = 'Copied!';
@@ -985,70 +1201,7 @@ function copyBib() {
   });
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-function buildCombinedTable() {
-  const target = document.getElementById('combinedScoreTable');
-  const sources = Array.from(document.querySelectorAll('#legacyTables table'));
-  const bands = [
-    'Setting (i): Rain1400, Outdoor-Rain, Raindrop, UHDSnow, SOTS',
-    'Setting (i): BSD68, LoL, UHDM, HDR-Eye, Average',
-    'Setting (ii): BSD68, GoPro, LoL',
-    'Setting (ii): Rain100L, SOTS, Average',
-  ];
-
-  sources.forEach((source, index) => {
-    const bandBody = document.createElement('tbody');
-    bandBody.className = 'score-band';
-    const band = document.createElement('tr');
-    const bandCell = document.createElement('th');
-    bandCell.className = 'setting-band';
-    bandCell.colSpan = 80;
-    bandCell.textContent = bands[index];
-    band.appendChild(bandCell);
-    bandBody.appendChild(band);
-    target.appendChild(bandBody);
-
-    const headBody = document.createElement('tbody');
-    headBody.className = 'score-head';
-    Array.from(source.tHead.rows).forEach(row => {
-      headBody.appendChild(row.cloneNode(true));
-    });
-    target.appendChild(headBody);
-
-    const body = document.createElement('tbody');
-    body.className = 'score-group';
-    Array.from(source.tBodies[0].rows).forEach(row => {
-      const cloned = row.cloneNode(true);
-      cloned.classList.add('score-row');
-      body.appendChild(cloned);
-    });
-    target.appendChild(body);
-  });
-}
-
-function highlightMetricRanks() {
-  document.querySelectorAll('#combinedScoreTable tbody.score-group').forEach(group => {
-    const rows = Array.from(group.querySelectorAll('tr.score-row'));
-    const maxCells = Math.max(...rows.map(row => row.cells.length));
-
-    for (let col = 1; col < maxCells; col++) {
-      const metricIndex = (col - 1) % 4;
-      const higherIsBetter = metricIndex === 0 || metricIndex === 1;
-      const values = rows.map(row => {
-        const cell = row.cells[col];
-        const value = cell ? Number.parseFloat(cell.textContent.replace(/[^\d.-]/g, '')) : Number.NaN;
-        return { cell, value };
-      }).filter(item => item.cell && Number.isFinite(item.value));
-
-      values.sort((a, b) => higherIsBetter ? b.value - a.value : a.value - b.value);
-      if (values[0]) values[0].cell.classList.add('best');
-      if (values[1]) values[1].cell.classList.add('second');
-    }
-  });
-}
-
-buildCombinedTable();
-highlightMetricRanks();
+/* Init */
 loadTask('Rain1400');
 </script>
 </body>
