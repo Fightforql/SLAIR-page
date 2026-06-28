@@ -369,7 +369,7 @@ footer a:hover{color:var(--text)}
           <span class="stage-badge b2">Stage 2</span>
           <h3>Conditional Flow Matching in Latent Space</h3>
           <p>
-            Given paired degraded and clean images, SLAIR encodes them into the structured VAE latent space and learns a conditional vector field that deterministically transports $z_{\mathrm{deg}}$ to $z_{\mathrm{gt}}$. Following the paper, the path is trained with bridge-noised intermediate states, velocity regression, and cosine alignment, then restored by solving an ODE from $t=0$ to $t=1$.
+            Given paired degraded and clean images, SLAIR encodes them into the structured VAE latent space and learns a conditional vector field that deterministically transports $z_{\mathrm{deg}}$ to $z_{\mathrm{gt}}$. As described in Section 3.3 of the SLAIR paper, the path is trained with bridge-noised intermediate states, velocity regression, and cosine alignment, then restored by solving an ODE from $t=0$ to $t=1$.
           </p>
           <div class="formula-panel" style="margin-top:1rem;max-width:920px">
             <div class="formula-label">Latent encoding</div>
@@ -390,7 +390,7 @@ footer a:hover{color:var(--text)}
             <div class="formula-label">Deterministic inference</div>
             <div class="formula-block">$$\frac{d\hat{z}(t)}{dt}=v_\theta(\hat{z}(t),t;\,z_{\mathrm{deg}}),\qquad \hat{z}(0)=z_{\mathrm{deg}},\quad t:0\rightarrow1$$</div>
             <div class="formula-block">$$\hat{I}=D(\hat{z}(1))$$</div>
-            <div class="formula-note">The equations follow Section 3.3 of the paper: paired path construction, bridge noise for robustness, conditional velocity regression, cosine alignment, and ODE-based deterministic restoration.</div>
+            <div class="formula-note">These equations summarize Section 3.3 of the SLAIR paper: paired path construction, bridge noise for robustness, conditional velocity regression, cosine alignment, and ODE-based deterministic restoration.</div>
           </div>
         </div>
       </div>
